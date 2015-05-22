@@ -3,7 +3,7 @@ from progress_bar import *
 import theano as _th
 
 
-def train(dataset_x, dataset_y, model, optimiser, criterion, epoch, batch_size):
+def train(dataset_x, dataset_y, model, optimiser, criterion, epoch, batch_size, mode=None):
     progress = make_progressbar('Training', epoch, len(dataset_x))
     progress.start()
 
@@ -17,9 +17,12 @@ def train(dataset_x, dataset_y, model, optimiser, criterion, epoch, batch_size):
             mini_batch_input[k] = dataset_x[shuffle[j * batch_size + k]]
             mini_batch_targets[k] = dataset_y[shuffle[j * batch_size + k]]
 
-        model.zero_grad_parameters()
-        model.accumulate_gradients(mini_batch_input, mini_batch_targets, criterion)
-        optimiser.update_parameters(model)
+        if mode is None:
+            model.zero_grad_parameters()
+            model.accumulate_gradients(mini_batch_input, mini_batch_targets, criterion)
+            optimiser.update_parameters(model)
+        else:
+            model.accumulate_statistics(mini_batch_input)
 
         progress.update(j * batch_size)
 

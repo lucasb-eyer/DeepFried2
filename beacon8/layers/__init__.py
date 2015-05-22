@@ -8,3 +8,5 @@ from .Dropout import *
 from .AddConstant import *
 from .Log import *
 from .Reshape import *
+from .SpatialConvolutionCUDNN import *
+from .SpatialMaxPoolingCUDNN import *
