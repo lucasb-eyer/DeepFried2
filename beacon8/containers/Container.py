@@ -30,5 +30,11 @@ class Container(Module):
 
         return params, grads
 
+    def get_stat_updates(self):
+        stat_updates = []
+        for module in self.modules:
+            stat_updates += module.get_stat_updates()
+        return stat_updates
+
     def add(self, module):
         self.modules.append(module)

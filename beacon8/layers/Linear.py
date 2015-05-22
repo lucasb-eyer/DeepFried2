@@ -38,3 +38,4 @@ class Linear(Module):
             out += self.bias
 
         return out
+
