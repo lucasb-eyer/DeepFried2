@@ -9,6 +9,7 @@ class Module:
 
         self.fn_forward = None
         self.fn_accum_grads = None
+        self.fn_accum_stats = None
 
     def reset(self):
         pass
@@ -70,3 +71,20 @@ class Module:
             )
 
         self.fn_accum_grads(data_in, data_tgt)
+
+    def get_stat_updates(self):
+        return []
+
+    def accumulate_statistics(self, data_in):
+        if self.fn_accum_stats is None:
+            symb_in = _T.TensorType(_th.config.floatX, (False,) * data_in.ndim)('X')
+            self.symb_forward(symb_in)
+
+            stat_updates = self.get_stat_updates()
+
+            self.fn_accum_stats = _th.function(
+                inputs=[symb_in],
+                updates=stat_updates
+            )
+
+        self.fn_accum_stats(data_in)

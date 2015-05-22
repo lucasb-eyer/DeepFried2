@@ -3,3 +3,8 @@ from .Softmax import *
 from .Module import *
 from .Tanh import *
 from .ReLU import *
+from .BatchNormalization import *
+from .Dropout import *
+from .AddConstant import *
+from .Log import *
+from .Reshape import *
