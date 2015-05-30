@@ -1,0 +1,6 @@
+__pycache__
+
+Beacon8.egg-info/
+
+# Example data files/folders
+examples/MNIST/mnist.pkl.gz
