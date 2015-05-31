@@ -1,8 +1,15 @@
 import os
 import gzip
 import pickle
-import urllib
 import sys
+
+# Python 2/3 compatibility.
+try:
+    from urllib.request import urlretrieve
+except ImportError:
+    from urllib import urlretrieve
+
+
 '''Adapted from theano tutorial'''
 
 
@@ -11,7 +18,7 @@ def load_mnist(data_file = './mnist.pkl.gz'):
     if not os.path.exists(data_file):
         origin = ('http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz')
         print('Downloading data from %s' % origin)
-        urllib.urlretrieve(origin, data_file)
+        urlretrieve(origin, data_file)
 
     print('... loading data')
 
