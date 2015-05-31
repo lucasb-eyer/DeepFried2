@@ -81,6 +81,10 @@ class Module:
             self.symb_forward(symb_in)
 
             stat_updates = self.get_stat_updates()
+            if not stat_updates:
+                # If there's no layer collecting statistics, we don't need to
+                # compile and call a function. This prevents theano errors.
+                return
 
             self.fn_accum_stats = _th.function(
                 inputs=[symb_in],

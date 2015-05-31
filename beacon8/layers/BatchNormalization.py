@@ -42,7 +42,7 @@ class BatchNormalization(Module):
         else:
             return symb_input * self.inference_weight.dimshuffle(*d_shuffle) + self.inference_bias.dimshuffle(*d_shuffle)
 
-    def get_stat_updates(self,):
+    def get_stat_updates(self):
         assert (self.batch_mean is not None) and (self.batch_var is not None), "You need to do a forward pass first"
 
         stat_updates = list()
