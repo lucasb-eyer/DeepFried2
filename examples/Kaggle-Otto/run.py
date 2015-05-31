@@ -59,8 +59,8 @@ if __name__ == "__main__":
         model.training()
         if epoch % 100 == 0:
             optimiser.hyperparams['lr'] /= 10
-        train(train_data_x, train_data_y, model, optimiser, criterion, epoch, 100)
-        train(train_data_x, train_data_y, model, optimiser, criterion, epoch, 100, 'stat')
+        train(train_data_x, train_data_y, model, optimiser, criterion, epoch, 100, 'train')
+        train(train_data_x, train_data_y, model, optimiser, criterion, epoch, 100, 'stats')
 
         model.evaluate()
         validate(test_data_x, test_data_y, model, epoch, 100)
