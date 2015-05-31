@@ -14,8 +14,8 @@ def create_param_and_grad(shape, init, fan=None, name=None, type=_th.config.floa
     return param, grad_param
 
 
-def create_param_state_as(other, initial_value=0):
+def create_param_state_as(other, initial_value=0, prefix='state_for_'):
     return _th.shared(other.get_value()*0 + initial_value,
         broadcastable=other.broadcastable,
-        name='state_for_' + str(other.name)
+        name=prefix + str(other.name)
     )
