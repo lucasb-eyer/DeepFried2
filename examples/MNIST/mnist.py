@@ -16,21 +16,14 @@ except ImportError:
 def load_mnist(data_file = os.path.join(os.path.dirname(__file__), 'mnist.pkl.gz')):
 
     if not os.path.exists(data_file):
-        origin = ('http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz')
-        print('Downloading data from %s' % origin)
+        origin = 'http://www.iro.umontreal.ca/~lisa/deep/data/mnist/mnist.pkl.gz'
+        print('Downloading data from {}'.format(origin))
         urlretrieve(origin, data_file)
 
     print('... loading data')
 
-    f = gzip.open(data_file, 'rb')
-    if sys.version_info[0] == 3:
-        train_set, valid_set, test_set = pickle.load(f, encoding='latin1')
-    else:
-        train_set, valid_set, test_set = pickle.load(f)
-    f.close()
-
-    train_set_x, train_set_y = train_set
-    valid_set_x, valid_set_y = valid_set
-    test_set_x, test_set_y = test_set
-
-    return (train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)
+    with gzip.open(data_file, 'rb') as f:
+        if sys.version_info[0] == 3:
+            return pickle.load(f, encoding='latin1')
+        else:
+            return pickle.load(f)
