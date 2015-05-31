@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import beacon8 as bb8
 import beacon8.optimizers as optim
+from os.path import dirname, join as pjoin
 from sklearn.preprocessing import LabelEncoder
 from sklearn.cross_validation import train_test_split
 from train import *
@@ -9,7 +10,7 @@ from test import *
 
 
 def load_train_data():
-    train_data = pd.read_csv('./data/train.csv')
+    train_data = pd.read_csv(pjoin(dirname(__file__), 'data', 'train.csv'))
     labels = train_data.target.values
     labels_encoder = LabelEncoder()
     labels = labels_encoder.fit_transform(labels)
