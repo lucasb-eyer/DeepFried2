@@ -1,7 +1,7 @@
 import numpy as np
-from progress_bar import *
 import theano as _th
 
+from examples.utils import make_progressbar
 
 def train(dataset_x, dataset_y, model, optimiser, criterion, epoch, batch_size, mode=None):
     progress = make_progressbar('Training', epoch, len(dataset_x))
@@ -24,6 +24,6 @@ def train(dataset_x, dataset_y, model, optimiser, criterion, epoch, batch_size, 
         else:
             model.accumulate_statistics(mini_batch_input)
 
-        progress.update(j * batch_size)
+        progress.update((j+1) * batch_size)
 
     progress.finish()

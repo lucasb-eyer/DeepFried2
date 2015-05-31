@@ -43,6 +43,9 @@ def nnet():
     return model
 
 if __name__ == "__main__":
+    if __package__ is None:  # PEP366
+        __package__ = "beacon8.examples.KaggleOtto"
+
     train_data_x, train_data_y = load_train_data()
 
     train_data_x, test_data_x, train_data_y, test_data_y = train_test_split(train_data_x, train_data_y, train_size=0.85)

@@ -1,6 +1,7 @@
 import numpy as np
-from progress_bar import *
 import theano as _th
+
+from examples.utils import make_progressbar
 
 def validate(dataset_x, dataset_y, model, epoch, batch_size):
     progress = make_progressbar('Testing', epoch, len(dataset_x))
