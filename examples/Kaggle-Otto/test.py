@@ -1,8 +1,7 @@
 import numpy as np
 import theano as _th
-from sklearn.metrics import log_loss
-from kaggle_utils import *
 
+from kaggle_utils import multiclass_log_loss
 from examples.utils import make_progressbar
 
 def validate(dataset_x, dataset_y, model, epoch, batch_size):
