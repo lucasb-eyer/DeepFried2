@@ -26,9 +26,10 @@ except ImportError:
         def update(self, i):
             _sys.stdout.write("\r" + self.fmt.format(i=i, tot=self.tot, pct=float(i)/self.tot))
             _sys.stdout.flush()
+            self.lasti = i
 
         def finish(self):
-            _sys.stdout.write("\r" + self.fmt.format(i=self.tot, tot=self.tot, pct=1.0) + "\n")
+            _sys.stdout.write("\r" + self.fmt.format(i=self.lasti, tot=self.tot, pct=1.0) + "\n")
             _sys.stdout.flush()
 
     def make_progressbar(mode, epoch, data_size):
