@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     train_data_x, train_data_y = load_train_data()
 
-    train_data_x, test_data_x, train_data_y, test_data_y = train_test_split(train_data_x, train_data_y, train_size=0.85)
+    train_data_x, valid_data_x, train_data_y, valid_data_y = train_test_split(train_data_x, train_data_y, train_size=0.85)
     model = nnet()
 
     criterion = bb8.ClassNLLCriterion()
@@ -63,5 +63,5 @@ if __name__ == "__main__":
         train(train_data_x, train_data_y, model, optimiser, criterion, epoch, 100, 'stats')
 
         model.evaluate()
-        validate(test_data_x, test_data_y, model, epoch, 100)
+        validate(valid_data_x, valid_data_y, model, epoch, 100)
 
