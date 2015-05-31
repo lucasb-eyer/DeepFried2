@@ -18,8 +18,8 @@ def main(params):
 
     for epoch in range(100):
         model.training()
-        train(train_set_x, train_set_y, model, optimiser, criterion, epoch, params['batch_size'])
-        train(train_set_x, train_set_y, model, optimiser, criterion, epoch, params['batch_size'], 'stat')
+        train(train_set_x, train_set_y, model, optimiser, criterion, epoch, params['batch_size'], 'train')
+        train(train_set_x, train_set_y, model, optimiser, criterion, epoch, params['batch_size'], 'stats')
 
         model.evaluate()
         validate(test_set_x, test_set_y, model, epoch, params['batch_size'])
