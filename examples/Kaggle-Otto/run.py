@@ -5,15 +5,14 @@ import beacon8.optimizers as optim
 from os.path import dirname, join as pjoin
 from sklearn.preprocessing import LabelEncoder
 from sklearn.cross_validation import train_test_split
-from train import *
-from test import *
+from train import train
+from test import validate
 
 
 def load_train_data():
     train_data = pd.read_csv(pjoin(dirname(__file__), 'data', 'train.csv'))
     labels = train_data.target.values
-    labels_encoder = LabelEncoder()
-    labels = labels_encoder.fit_transform(labels)
+    labels = LabelEncoder().fit_transform(labels)
     train_data = train_data.drop('id', axis=1)
     train_data = train_data.drop('target', axis=1)
     return train_data.as_matrix(), labels
@@ -56,9 +55,9 @@ if __name__ == "__main__":
 
     optimiser = optim.Momentum(lr=0.01, momentum=0.9)
 
-    for epoch in range(1000):
+    for epoch in range(1, 1001):
         model.training()
-        if epoch > 100 and epoch % 100 == 0:
+        if epoch % 100 == 0:
             optimiser.hyperparams['lr'] /= 10
         train(train_data_x, train_data_y, model, optimiser, criterion, epoch, 100)
         train(train_data_x, train_data_y, model, optimiser, criterion, epoch, 100, 'stat')
