@@ -8,8 +8,8 @@ import sys as _sys
 try:
     import progressbar as _pb
 
-    def make_progressbar(mode, epoch, data_size):
-        widgets = [mode + ' epoch #', str(epoch), ', processed ', _pb.Counter(), ' of ', str(data_size),
+    def make_progressbar(prefix, data_size):
+        widgets = [prefix, ', processed ', _pb.Counter(), ' of ', str(data_size),
                    ' (', _pb.Percentage(), ')', ' ', _pb.Bar(), ' ', _pb.ETA()]
         return _pb.ProgressBar(maxval=data_size, widgets=widgets)
 
@@ -32,7 +32,5 @@ except ImportError:
             _sys.stdout.write("\r" + self.fmt.format(i=self.lasti, tot=self.tot, pct=1.0) + "\n")
             _sys.stdout.flush()
 
-    def make_progressbar(mode, epoch, data_size):
-        return SimpleProgressBar(data_size,
-            "{} epoch #{}, processed {{i}} of {{tot}} ({{pct:.2%}})".format(mode, epoch)
-        )
+    def make_progressbar(prefix, data_size):
+        return SimpleProgressBar(data_size, prefix + ", processed {i} of {tot} ({pct:.2%})")

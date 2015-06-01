@@ -5,7 +5,7 @@ from examples.utils import make_progressbar
 
 
 def train(dataset_x, dataset_y, model, optimiser, criterion, epoch, batch_size, mode='train'):
-    progress = make_progressbar('Training ({})'.format(mode), epoch, len(dataset_x))
+    progress = make_progressbar('Training ({}) epoch #{}'.format(mode, epoch), len(dataset_x))
     progress.start()
 
     shuffle = np.random.permutation(len(dataset_x))

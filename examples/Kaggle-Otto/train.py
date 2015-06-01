@@ -4,7 +4,7 @@ import theano as _th
 from examples.utils import make_progressbar
 
 def train(dataset_x, dataset_y, model, optimiser, criterion, epoch, batch_size, mode=None):
-    progress = make_progressbar('Training', epoch, len(dataset_x))
+    progress = make_progressbar('Training epoch #{}'.format(epoch), len(dataset_x))
     progress.start()
 
     shuffle = np.random.permutation(len(dataset_x))
