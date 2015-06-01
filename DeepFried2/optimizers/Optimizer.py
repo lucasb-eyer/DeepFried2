@@ -24,3 +24,6 @@ class Optimizer:
 
     def get_updates(self, params, grads):
         raise NotImplementedError
+
+    def __repr__(self):
+        return type(self).__name__ + "(" + ", ".join(k+"="+str(v) for k,v in self.hyperparams.items()) + ")"
