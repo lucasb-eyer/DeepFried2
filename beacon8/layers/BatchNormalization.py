@@ -1,4 +1,6 @@
 from .Module import Module
+from beacon8.init import zero, one
+from beacon8.utils import create_param, create_param_and_grad
 
 import numpy as _np
 import theano as _th
@@ -9,17 +11,16 @@ class BatchNormalization(Module):
     def __init__(self, n_features, eps=None):
         Module.__init__(self)
 
-        self.weight = _th.shared(_np.ones(shape=(n_features,), dtype=_th.config.floatX))
-        self.bias = _th.shared(_np.zeros(shape=(n_features, ), dtype=_th.config.floatX))
-        self.grad_weight = _th.shared(_np.zeros(shape=(n_features,), dtype=_th.config.floatX))
-        self.grad_bias = _th.shared(_np.zeros(shape=(n_features, ), dtype=_th.config.floatX))
+        self.weight, self.grad_weight = create_param_and_grad(n_features, one, 'W_BN')
+        self.bias, self.grad_bias = create_param_and_grad(n_features, zero, 'b_BN')
 
-        self.inference_weight = _th.shared(_np.ones(shape=(n_features,), dtype=_th.config.floatX))
-        self.inference_bias = _th.shared(_np.zeros(shape=(n_features, ), dtype=_th.config.floatX))
+        self.inference_weight = create_param(n_features, one, 'W_BN_inf')
+        self.inference_bias = create_param(n_features, zero, 'b_BN_inf')
 
-        self.buffer_variance = _th.shared(_np.ones(shape=(n_features, ), dtype=_th.config.floatX))
-        self.buffer_mean = _th.shared(_np.zeros(shape=(n_features, ), dtype=_th.config.floatX))
-        self.buffer_counts = _th.shared(_np.asarray(0., dtype=_th.config.floatX))
+        # These are buffers for collecting the minibatch statistics.
+        self.buffer_variance = create_param(n_features, one, 'BN_var')
+        self.buffer_mean = create_param(n_features, zero, 'BN_mean')
+        self.buffer_counts = _th.shared(_np.asarray(0, dtype=_th.config.floatX))
 
         self.eps = eps or 1e-5
 

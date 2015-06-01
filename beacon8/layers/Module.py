@@ -11,9 +11,6 @@ class Module:
         self.fn_accum_grads = None
         self.fn_accum_stats = None
 
-    def reset(self):
-        pass
-
     #def __hash__(self):
     #    raise NotImplementedError("You *need* to reimplement hash, even if it's just python's default. See the documentation for more info.")
 
