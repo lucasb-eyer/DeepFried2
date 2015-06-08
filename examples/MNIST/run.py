@@ -26,6 +26,9 @@ def main(params):
 
 
 if __name__ == "__main__":
+    if __package__ is None:  # PEP366
+        __package__ = "beacon8.examples.MNIST"
+
     params = {}
     params['lr'] = 0.1
     params['batch_size'] = 64
