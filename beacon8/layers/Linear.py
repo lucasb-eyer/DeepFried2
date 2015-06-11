@@ -8,7 +8,7 @@ import theano as _th
 
 class Linear(Module):
 
-    def __init__(self, nin, nout, init=xavier, with_bias=True, init_b=zero):
+    def __init__(self, nin, nout, init=xavier(), with_bias=True, init_b=zero):
         Module.__init__(self)
 
         self.nin = nin

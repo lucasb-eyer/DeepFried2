@@ -7,7 +7,7 @@ import numpy as _np
 
 
 class SpatialConvolution(Module):
-    def __init__(self, n_input_plane, n_output_plane, k_w, k_h, d_w=1, d_h=1, with_bias=True, border_mode='valid', imshape=None, init=xavier, init_b=zero):
+    def __init__(self, n_input_plane, n_output_plane, k_w, k_h, d_w=1, d_h=1, with_bias=True, border_mode='valid', imshape=None, init=xavier(), init_b=zero):
         Module.__init__(self)
         self.n_input_plane = n_input_plane
         self.n_output_plane = n_output_plane

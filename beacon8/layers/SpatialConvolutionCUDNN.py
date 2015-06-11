@@ -8,7 +8,7 @@ import theano.sandbox.cuda.dnn as _dnn
 
 
 class SpatialConvolutionCUDNN(Module):
-    def __init__(self, n_input_plane, n_output_plane, k_w, k_h, d_w=1, d_h=1, pad_w=0, pad_h=0, with_bias=True, init=xavier, init_b=zero):
+    def __init__(self, n_input_plane, n_output_plane, k_w, k_h, d_w=1, d_h=1, pad_w=0, pad_h=0, with_bias=True, init=xavier(), init_b=zero):
         Module.__init__(self)
         self.n_input_plane = n_input_plane
         self.n_output_plane = n_output_plane
