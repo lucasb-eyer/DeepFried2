@@ -1,5 +1,5 @@
 from .Module import Module
-from beacon8.init import zero, xavier
+from beacon8.init import const, xavier
 from beacon8.utils import create_param_and_grad
 
 import numpy as _np
@@ -8,7 +8,7 @@ import theano as _th
 
 class Linear(Module):
 
-    def __init__(self, nin, nout, with_bias=True, initW=xavier(), initB=zero):
+    def __init__(self, nin, nout, with_bias=True, initW=xavier(), initB=const(0)):
         Module.__init__(self)
 
         self.nin = nin

@@ -1,4 +1,4 @@
-from .Const import const, zero, one
+from .Const import const
 from .Xavier import xavier, xavierN, xavierSigm, xavierSigmN
 from .PReLU import prelu, preluN
 from .Normal import normal

@@ -1,5 +1,5 @@
 from .Module import Module
-from beacon8.init import zero, one
+from beacon8.init import const
 from beacon8.utils import create_param, create_param_and_grad
 
 import numpy as _np
@@ -11,15 +11,15 @@ class BatchNormalization(Module):
     def __init__(self, n_features, eps=None):
         Module.__init__(self)
 
-        self.weight, self.grad_weight = create_param_and_grad(n_features, one, 'W_BN')
-        self.bias, self.grad_bias = create_param_and_grad(n_features, zero, 'b_BN')
+        self.weight, self.grad_weight = create_param_and_grad(n_features, const(1), 'W_BN')
+        self.bias, self.grad_bias = create_param_and_grad(n_features, const(0), 'b_BN')
 
-        self.inference_weight = create_param(n_features, one, 'W_BN_inf')
-        self.inference_bias = create_param(n_features, zero, 'b_BN_inf')
+        self.inference_weight = create_param(n_features, const(1), 'W_BN_inf')
+        self.inference_bias = create_param(n_features, const(0), 'b_BN_inf')
 
         # These are buffers for collecting the minibatch statistics.
-        self.buffer_variance = create_param(n_features, one, 'BN_var')
-        self.buffer_mean = create_param(n_features, zero, 'BN_mean')
+        self.buffer_variance = create_param(n_features, const(1), 'BN_var')
+        self.buffer_mean = create_param(n_features, const(0), 'BN_mean')
         self.buffer_counts = _th.shared(_np.asarray(0, dtype=_th.config.floatX))
 
         self.eps = eps or 1e-5
