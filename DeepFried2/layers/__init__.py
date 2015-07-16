@@ -12,3 +12,4 @@ from .SpatialConvolution import *
 from .SpatialMaxPooling import *
 from .SpatialConvolutionCUDNN import *
 from .SpatialMaxPoolingCUDNN import *
+from .SpatialSoftMaxCUDNN import *
