@@ -7,8 +7,7 @@ class Container(Module):
         Module.__init__(self)
 
         self.modules = []
-        for module in modules:
-            self.add(module)
+        self.add(*modules)
 
     def evaluate(self):
         Module.evaluate(self)
@@ -36,5 +35,6 @@ class Container(Module):
             stat_updates += module.get_stat_updates()
         return stat_updates
 
-    def add(self, module):
-        self.modules.append(module)
+    def add(self, *modules):
+        assert all(isinstance(m, Module) for m in modules), "`Container`s can only contain objects subtyping `Module`."
+        self.modules += modules
