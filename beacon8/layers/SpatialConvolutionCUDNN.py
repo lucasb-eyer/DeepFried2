@@ -1,12 +1,14 @@
+from .Module import Module
+from beacon8.init import zero, xavier
+from beacon8.utils import create_param_and_grad
+
 import theano as _th
 import numpy as _np
 import theano.sandbox.cuda.dnn as _dnn
 
-from .Module import Module
-
 
 class SpatialConvolutionCUDNN(Module):
-    def __init__(self, n_input_plane, n_output_plane, k_w, k_h, d_w=1, d_h=1, pad_w=0, pad_h=0, with_bias=True):
+    def __init__(self, n_input_plane, n_output_plane, k_w, k_h, d_w=1, d_h=1, pad_w=0, pad_h=0, with_bias=True, init=xavier, init_b=zero):
         Module.__init__(self)
         self.n_input_plane = n_input_plane
         self.n_output_plane = n_output_plane
@@ -17,15 +19,13 @@ class SpatialConvolutionCUDNN(Module):
         self.pad_w = pad_w
         self.pad_h = pad_h
         self.with_bias = with_bias
-        w_bound = _np.sqrt(4. / ((self.n_input_plane + self.n_output_plane) * self.k_w * self.k_h))
 
-        W = _np.random.uniform(low=-w_bound, high=w_bound, size=(n_output_plane, n_input_plane, k_h, k_w))
-        self.weight = _th.shared(W.astype(dtype=_th.config.floatX))
-        self.grad_weight = _th.shared((W*0).astype(dtype=_th.config.floatX))
+        w_shape = (n_output_plane, n_input_plane, k_h, k_w)
+        w_fan = (n_input_plane*k_w*k_h, n_output_plane*k_w*k_h)
 
+        self.weight, self.grad_weight = create_param_and_grad(w_shape, init, fan=w_fan, name='Wconv_{},{}@{}x{}'.format(n_input_plane, n_output_plane, k_w, k_h))
         if self.with_bias:
-            self.bias = _th.shared(_np.zeros(shape=(n_output_plane, ), dtype=_th.config.floatX))
-            self.grad_bias = _th.shared(_np.zeros(shape=(n_output_plane, ), dtype=_th.config.floatX))
+            self.bias, self.grad_bias = create_param_and_grad(n_output_plane, init_b, name='bconv_{}'.format(n_output_plane))
 
     def symb_forward(self, symb_input):
         conv_output = _dnn.dnn_conv(img=symb_input,

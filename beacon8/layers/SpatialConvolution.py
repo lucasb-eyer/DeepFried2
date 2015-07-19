@@ -1,11 +1,13 @@
 from .Module import Module
+from beacon8.init import zero, xavier
+from beacon8.utils import create_param_and_grad
 
 import theano as _th
 import numpy as _np
 
 
 class SpatialConvolution(Module):
-    def __init__(self, n_input_plane, n_output_plane, k_w, k_h, d_w=1, d_h=1, with_bias=True, border_mode='valid', imshape=None):
+    def __init__(self, n_input_plane, n_output_plane, k_w, k_h, d_w=1, d_h=1, with_bias=True, border_mode='valid', imshape=None, init=xavier, init_b=zero):
         Module.__init__(self)
         self.n_input_plane = n_input_plane
         self.n_output_plane = n_output_plane
@@ -17,19 +19,17 @@ class SpatialConvolution(Module):
         self.border_mode = border_mode
         self.imshape = imshape
 
-        w_bound = _np.sqrt(4. / ((self.n_input_plane + self.n_output_plane) * self.k_w * self.k_h))
-        W = _np.random.uniform(low=-w_bound, high=w_bound, size=(n_output_plane, n_input_plane, k_h, k_w))
-        self.weight = _th.shared(W.astype(dtype=_th.config.floatX))
-        self.grad_weight = _th.shared((W*0).astype(dtype=_th.config.floatX))
+        self.w_shape = (n_output_plane, n_input_plane, k_h, k_w)
+        w_fan = (n_input_plane*k_w*k_h, n_output_plane*k_w*k_h)
 
+        self.weight, self.grad_weight = create_param_and_grad(self.w_shape, init, fan=w_fan, name='Wconv_{},{}@{}x{}'.format(n_input_plane, n_output_plane, k_w, k_h))
         if self.with_bias:
-            self.bias = _th.shared(_np.zeros(shape=(n_output_plane, ), dtype=_th.config.floatX))
-            self.grad_bias = _th.shared(_np.zeros(shape=(n_output_plane, ), dtype=_th.config.floatX))
+            self.bias, self.grad_bias = create_param_and_grad(n_output_plane, init_b, name='bconv_{}'.format(n_output_plane))
 
     def symb_forward(self, symb_input):
         conv_output = _th.tensor.nnet.conv.conv2d(symb_input, self.weight,
             image_shape=(None, self.n_input_plane) + (self.imshape or (None, None)),
-            filter_shape=(self.n_output_plane, self.n_input_plane, self.k_h, self.k_w),
+            filter_shape=self.w_shape,
             border_mode=self.border_mode,
             subsample=(self.d_h, self.d_w)
         )
@@ -38,4 +38,3 @@ class SpatialConvolution(Module):
             return conv_output + self.bias.dimshuffle('x', 0, 'x', 'x')
         else:
             return conv_output
-
