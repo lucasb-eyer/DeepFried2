@@ -1,7 +1,7 @@
 import numpy as _np
 
 
-def const(value):
+def normal(std):
     def init(shape, fan):
-        return _np.full(shape, value)
+        return std*_np.random.randn(*shape)
     return init
