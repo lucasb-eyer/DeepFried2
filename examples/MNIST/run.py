@@ -1,13 +1,13 @@
 import DeepFried2 as df
 import DeepFried2.optimizers as optim
-from mnist import *
+
 from train import *
 from test import *
 from model import *
 
 
 def main(params):
-    train_set, valid_set, test_set = load_mnist()
+    train_set, valid_set, test_set = df.datasets.mnist.data()
     train_set_x, train_set_y = train_set
     test_set_x, test_set_y = test_set
 
@@ -15,7 +15,7 @@ def main(params):
 
     criterion = df.ClassNLLCriterion()
 
-    optimiser = optim.SGD(lr=params['lr'])
+    optimiser = df.optimizers.SGD(lr=params['lr'])
 
     for epoch in range(100):
         model.training()
