@@ -22,12 +22,12 @@ class Module:
     def parameters(self):
         params, grads = [], []
 
-        if self.training_mode and hasattr(self, 'weight'):
+        if hasattr(self, 'weight'):
             assert hasattr(self, 'grad_weight'), "The layer {} has a `weight` variable but no `grad_weight`, you probably forget to implement it.".format(type(self))
             params += [self.weight]
             grads += [self.grad_weight]
 
-        if self.training_mode and hasattr(self, 'bias'):
+        if hasattr(self, 'bias'):
             assert hasattr(self, 'grad_bias'), "The layer {} has a `bias` variable but no `grad_bias`, you probably forget to implement it.".format(type(self))
             params += [self.bias]
             grads += [self.grad_bias]
