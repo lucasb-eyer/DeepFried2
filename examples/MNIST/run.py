@@ -1,3 +1,4 @@
+import DeepFried2 as df
 import DeepFried2.optimizers as optim
 from mnist import *
 from train import *
@@ -12,7 +13,7 @@ def main(params):
 
     model = lenet()
 
-    criterion = bb8.ClassNLLCriterion()
+    criterion = df.ClassNLLCriterion()
 
     optimiser = optim.SGD(lr=params['lr'])
 
