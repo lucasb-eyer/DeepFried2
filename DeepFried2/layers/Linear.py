@@ -1,6 +1,6 @@
 from .Module import Module
-from beacon8.init import const, xavier
-from beacon8.utils import create_param_and_grad
+from DeepFried2.init import const, xavier
+from DeepFried2.utils import create_param_and_grad
 
 import numpy as _np
 import theano as _th

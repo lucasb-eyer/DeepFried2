@@ -1,4 +1,4 @@
-import beacon8.optimizers as optim
+import DeepFried2.optimizers as optim
 from mnist import *
 from train import *
 from test import *
@@ -27,7 +27,7 @@ def main(params):
 
 if __name__ == "__main__":
     if __package__ is None:  # PEP366
-        __package__ = "beacon8.examples.MNIST"
+        __package__ = "DeepFried2.examples.MNIST"
 
     params = {}
     params['lr'] = 0.1

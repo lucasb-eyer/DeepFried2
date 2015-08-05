@@ -2,10 +2,10 @@
 
 from setuptools import setup, find_packages
 
-setup(name='Beacon8',
+setup(name='DeepFried2',
       version='0.01',
       description='A Torch-inspired library for high-level deep learning with Theano.',
-      author='Ilya Kostrikov and Lucas Beyer',
-      author_email='ikostrikov@gmail.com and lucasb.eyer.be@gmail.com',
-      url='http://github.com/VisualComputingInstitute/Beacon8',
+      author='Lucas Beyer',
+      author_email='lucasb.eyer.be@gmail.com',
+      url='http://github.com/lucasb-eyer/DeepFried2',
       packages=find_packages())
