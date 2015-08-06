@@ -26,9 +26,11 @@ def count_params(module):
     return sum(p.get_value().size for p in params)
 
 
-def save_params(module, where):
+def save_params(module, where, compress=False):
     params, _ = module.parameters()
-    _np.savez_compressed(where, params=[p.get_value() for p in params])
+
+    savefn = _np.savez_compressed if compress else _np.savez
+    savefn(where, params=[p.get_value() for p in params])
 
 
 def load_params(module, fromwhere):
