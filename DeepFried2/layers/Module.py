@@ -64,10 +64,11 @@ class Module:
             grads_updates = [(grad, grad + symb_grad) for grad, symb_grad in zip(grads, symb_grads)]
             self.fn_accum_grads = _th.function(
                 inputs=[symb_in, symb_tgt],
+                outputs=symb_err,
                 updates=grads_updates
             )
 
-        self.fn_accum_grads(data_in, data_tgt)
+        return self.fn_accum_grads(data_in, data_tgt)
 
     def get_stat_updates(self):
         return []
