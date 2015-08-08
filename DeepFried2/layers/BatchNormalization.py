@@ -11,16 +11,16 @@ class BatchNormalization(Module):
     def __init__(self, n_features, eps=None):
         Module.__init__(self)
 
-        self.weight, self.grad_weight = create_param_and_grad(n_features, const(1), 'W_BN')
-        self.bias, self.grad_bias = create_param_and_grad(n_features, const(0), 'b_BN')
+        self.weight, self.grad_weight = create_param_and_grad(n_features, const(1), name='W_BN_{}'.format(n_features))
+        self.bias, self.grad_bias = create_param_and_grad(n_features, const(0), name='b_BN_{}'.format(n_features))
 
-        self.inference_weight = create_param(n_features, const(1), 'W_BN_inf')
-        self.inference_bias = create_param(n_features, const(0), 'b_BN_inf')
+        self.inference_weight = create_param(n_features, const(1), name='W_BN_{}_inf'.format(n_features))
+        self.inference_bias = create_param(n_features, const(0), name='b_BN_{}_inf'.format(n_features))
 
         # These are buffers for collecting the minibatch statistics.
-        self.buffer_variance = create_param(n_features, const(1), 'BN_var')
-        self.buffer_mean = create_param(n_features, const(0), 'BN_mean')
-        self.buffer_counts = _th.shared(_np.asarray(0, dtype=_th.config.floatX))
+        self.buffer_variance = create_param(n_features, const(1), name='BN_var_{}'.format(n_features))
+        self.buffer_mean = create_param(n_features, const(0), name='BN_mean_{}'.format(n_features))
+        self.buffer_counts = _th.shared(_np.asarray(0, dtype=_th.config.floatX), name='BN_count_{}'.format(n_features))
 
         self.eps = eps or 1e-5
 
