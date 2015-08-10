@@ -6,7 +6,7 @@ def ortho_qr(gain=_np.sqrt(2)):
     # tanh activations       g > 1
     # ReLU activations       g = sqrt(2) (or greater)
 
-    def init(shape, **_):
+    def init(shape, fan):
         # Note that this is not strictly correct.
         #
         # What we'd really want is for an initialization which reuses ortho
@@ -31,7 +31,7 @@ def ortho_svd(gain=_np.sqrt(2)):
     # tanh activations       g > 1
     # ReLU activations       g = sqrt(2) (or greater)
 
-    def init(shape, **_):
+    def init(shape, fan):
         flat = (shape[0], _np.prod(shape[1:]))
         u, _, v = _np.linalg.svd(_np.random.randn(*flat), full_matrices=False)
         w = u if u.shape == flat else v
