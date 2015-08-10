@@ -19,3 +19,22 @@ def create_param_state_as(other, initial_value=0, prefix='state_for_'):
         broadcastable=other.broadcastable,
         name=prefix + str(other.name)
     )
+
+
+def count_params(module):
+    params, _ = module.parameters()
+    return sum(p.get_value().size for p in params)
+
+
+def save_params(module, where, compress=False):
+    params, _ = module.parameters()
+
+    savefn = _np.savez_compressed if compress else _np.savez
+    savefn(where, params=[p.get_value() for p in params])
+
+
+def load_params(module, fromwhere):
+    params, _ = module.parameters()
+    with _np.load(fromwhere) as f:
+        for p, v in zip(params, f['params']):
+            p.set_value(v)
