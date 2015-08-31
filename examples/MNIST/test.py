@@ -17,7 +17,7 @@ def validate(dataset_x, dataset_y, model, epoch, batch_size):
 
         nerrors += sum(mini_batch_targets != mini_batch_prediction)
 
-        progress.update((j+1) * batch_size)
+        progress.update(j*batch_size + len(mini_batch_input))
 
     progress.finish()
     accuracy = 1 - float(nerrors)/dataset_x.shape[0]
