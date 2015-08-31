@@ -38,3 +38,12 @@ def load_params(module, fromwhere):
     with _np.load(fromwhere) as f:
         for p, v in zip(params, f['params']):
             p.set_value(v)
+
+
+def aslist(what):
+    if isinstance(what, list):
+        return what
+    elif isinstance(what, tuple):
+        return list(what)
+    else:
+        return [what]

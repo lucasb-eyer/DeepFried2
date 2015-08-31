@@ -1,5 +1,7 @@
 from ..layers import Module
 
+from DeepFried2.utils import aslist as _aslist
+
 
 class Container(Module):
 
@@ -38,3 +40,6 @@ class Container(Module):
     def add(self, *modules):
         assert all(isinstance(m, Module) for m in modules), "`Container`s can only contain objects subtyping `Module`."
         self.modules += modules
+
+    def __getitem__(self, slice_):
+        return type(self)(*_aslist(self.modules[slice_]))
