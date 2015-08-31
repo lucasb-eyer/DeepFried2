@@ -1,6 +1,8 @@
 import theano as _th
 import theano.tensor as _T
 
+from DeepFried2.utils import make_tensors_or_tensors, aslist
+
 from collections import OrderedDict as _OrderedDict
 
 class Module:
@@ -60,19 +62,19 @@ class Module:
 
     def forward(self, data):
         if self.training_mode not in self._fn_forward:
-            symb_in = _T.TensorType(_th.config.floatX, (False,) * data.ndim)('X')
+            symb_in = make_tensors_or_tensors(data, 'X')
             symb_out = self.symb_forward(symb_in)
             self._fn_forward[self.training_mode] = _th.function(
-                inputs=[symb_in],
+                inputs=aslist(symb_in),
                 outputs=symb_out
             )
 
-        return self._fn_forward[self.training_mode](data)
+        return self._fn_forward[self.training_mode](*aslist(data))
 
     def accumulate_gradients(self, data_in, data_tgt, loss):
         if self.training_mode not in self._fn_accum_grads:
-            symb_in = _T.TensorType(_th.config.floatX, (False,) * data_in.ndim)('X')
-            symb_tgt = _T.TensorType(_th.config.floatX, (False,) * data_tgt.ndim)('T')
+            symb_in = make_tensors_or_tensors(data_in, 'X')
+            symb_tgt = make_tensors_or_tensors(data_tgt, 'T')
             symb_out = self.symb_forward(symb_in)
             symb_err = loss.symb_forward(symb_out, symb_tgt)
 
@@ -81,20 +83,23 @@ class Module:
 
             grads_updates = [(grad, grad + symb_grad) for grad, symb_grad in zip(grads, symb_grads)]
             self._fn_accum_grads[self.training_mode] = _th.function(
-                inputs=[symb_in, symb_tgt],
+                inputs=aslist(symb_in) + aslist(symb_tgt),
                 outputs=symb_err,
                 updates=grads_updates
             )
 
-        return self._fn_accum_grads[self.training_mode](data_in, data_tgt)
+        args = aslist(data_in) + aslist(data_tgt)
+        return self._fn_accum_grads[self.training_mode](*args)
 
     def get_stat_updates(self):
         return []
 
     def accumulate_statistics(self, data_in):
         if self.training_mode not in self._fn_accum_stats:
-            symb_in = _T.TensorType(_th.config.floatX, (False,) * data_in.ndim)('X')
+            symb_in = make_tensors_or_tensors(data_in, 'X')
 
+            # Call forward once so it can compute some variables it'll actually
+            # use in the stat updates collection.
             self.symb_forward(symb_in)
 
             stat_updates = self.get_stat_updates()
@@ -120,8 +125,8 @@ class Module:
                 stat_updates = uniq_updates
 
             self._fn_accum_stats[self.training_mode] = _th.function(
-                inputs=[symb_in],
+                inputs=aslist(symb_in),
                 updates=stat_updates
             )
 
-        self._fn_accum_stats[self.training_mode](data_in)
+        self._fn_accum_stats[self.training_mode](*aslist(data_in))
