@@ -2,7 +2,6 @@ import DeepFried2 as df
 
 from examples.utils import make_progressbar
 
-from mnist import load_mnist
 from train import train
 from test import test
 from model import net, lenet2
@@ -16,7 +15,7 @@ if __name__ == "__main__":
 
     batch_size = 64
 
-    (Xtrain, ytrain), (Xval, yval), (Xtest, ytest) = load_mnist()
+    (Xtrain, ytrain), (Xval, yval), (Xtest, ytest) = df.datasets.mnist.data()
 
     criterion = df.ClassNLLCriterion()
 
