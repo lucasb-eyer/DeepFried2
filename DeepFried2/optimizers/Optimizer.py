@@ -11,7 +11,7 @@ class Optimizer:
     def update_parameters(self, model):
 
         if model not in self.states:
-            params, grads = model.parameters()
+            params, grads = model.unique_parameters()
             # TODO: Not only scalar
             hyperparams = {name: _T.scalar(name) for name in self.hyperparams}
             updates = self.get_updates(params, grads, **hyperparams)
