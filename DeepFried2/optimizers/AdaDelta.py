@@ -11,8 +11,8 @@ class AdaDelta(Optimizer):
     The paper itself is really neat, and both very convincing and practical.
 
     TL;DR: 1. AdaGrad quickly anneals, AdaDelta doesn't. (No proof.)
-           2. AdaGrad *is* sensitive to learning-rate, AdaGrad not so much. (Table 1.)
-           3. AdaGrad includes 2nd-order approximation. (3.2)
+           2. AdaGrad *is* sensitive to learning-rate, AdaDelta not so much. (Table 1.)
+           3. AdaDelta includes 2nd-order approximation. (3.2)
 
     The updates are:
 
