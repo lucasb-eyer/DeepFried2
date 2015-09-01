@@ -2,6 +2,7 @@ from .Linear import *
 from .Softmax import *
 from .Module import *
 from .Tanh import *
+from .Sigmoid import *
 from .ReLU import *
 from .BatchNormalization import *
 from .Dropout import *
