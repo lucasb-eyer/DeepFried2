@@ -8,6 +8,6 @@ class Concat(Container):
         Container.__init__(self)
         self.axis = axis
 
-    def symb_forward(self, symb_input):
-        symb_outputs = [module.symb_forward(symb_input) for module in self.modules]
-        return _T.concatenate(symb_outputs, self.axis)
+    def symb_forward(self, symb_inputs):
+        assert isinstance(symb_inputs, (list, tuple)), "Input to `Concat` container needs to be a tuple or a list."
+        return _T.concatenate(symb_inputs, self.axis)

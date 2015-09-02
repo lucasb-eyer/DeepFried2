@@ -21,6 +21,17 @@ def create_param_state_as(other, initial_value=0, prefix='state_for_'):
     )
 
 
+def make_tensor(ndim, name):
+    return _th.tensor.TensorType(_th.config.floatX, (False,) * ndim)(name)
+
+
+def make_tensors_or_tensors(data_or_datas, name):
+    if isinstance(data_or_datas, (list, tuple)):
+        return [make_tensor(data.ndim, name + str(i+1)) for i, data in enumerate(data_or_datas)]
+    else:
+        return make_tensor(data_or_datas.ndim, name)
+
+
 def count_params(module):
     params, _ = module.unique_parameters()
     return sum(p.get_value().size for p in params)
