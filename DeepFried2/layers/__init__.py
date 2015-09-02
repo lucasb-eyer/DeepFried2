@@ -13,6 +13,7 @@ from .SpatialConvolution import SpatialConvolution
 from .SpatialConvolution3D import SpatialConvolution3D
 from .SpatialConvolutionCUDNN import SpatialConvolutionCUDNN
 from .SpatialMaxPooling import SpatialMaxPooling
+from .SpatialMaxPooling3D import SpatialMaxPooling3D
 from .SpatialMaxPoolingCUDNN import SpatialMaxPoolingCUDNN
 from .SpatialSoftMaxCUDNN import SpatialSoftMaxCUDNN
 from .Tanh import Tanh
