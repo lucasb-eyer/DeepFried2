@@ -36,7 +36,7 @@ class Container(df.Module):
         return stat_updates
 
     def add(self, *modules):
-        assert all(isinstance(m, df.Module) for m in modules), "`Container`s can only contain objects subtyping `df.Module`."
+        assert all(isinstance(m, df.Module) for m in modules), "`{}`s can only contain objects subtyping `df.Module`.".format(self.__class__.__name__)
         self.modules += modules
 
     def __getitem__(self, slice_):

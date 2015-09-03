@@ -7,5 +7,5 @@ class Concat(df.Container):
         self.axis = axis
 
     def symb_forward(self, symb_inputs):
-        assert isinstance(symb_inputs, (list, tuple)), "Input to `Concat` container needs to be a tuple or a list."
+        assert isinstance(symb_inputs, (list, tuple)), "Input to `{}` container needs to be a tuple or a list.".format(self.__class__.__name__)
         return df.T.concatenate(symb_inputs, self.axis)
