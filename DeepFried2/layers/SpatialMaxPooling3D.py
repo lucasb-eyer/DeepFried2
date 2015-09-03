@@ -45,6 +45,8 @@ class SpatialMaxPooling3D(Module):
 
         input_4d = _T.reshape(symb_input, new_shape, ndim=4)
 
+        # downsample height and width first
+        # other dimensions contribute to batch_size
         op = _T.signal.downsample.DownsampleFactorMax((self.k_h, self.k_w), self.ignore_border)
         output = op(input_4d)
 
@@ -63,6 +65,8 @@ class SpatialMaxPooling3D(Module):
         new_shape = _T.cast(_T.join(0, batch_size, _T.as_tensor([1,]), vol_shape), 'int64')
         input_4D_depth = _T.reshape(input_depth, new_shape, ndim=4)
 
+        # downsample depth
+        # other dimensions contribute to batch_size
         op = _T.signal.downsample.DownsampleFactorMax((1,self.k_d), self.ignore_border)
         outdepth = op(input_4D_depth)
 
