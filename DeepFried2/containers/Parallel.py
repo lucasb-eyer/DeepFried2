@@ -1,9 +1,7 @@
-from .Container import Container
-
-import theano.tensor as _T
+import DeepFried2 as df
 
 
-class Parallel(Container):
+class Parallel(df.Container):
     def symb_forward(self, symb_input):
         # TODO: Not sure if this polymorphism is any good!
         if isinstance(symb_input, (list, tuple)):

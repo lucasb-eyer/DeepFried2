@@ -1,12 +1,11 @@
-from .Module import Module
+import DeepFried2 as df
 
-import theano as _th
-from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
-_srng = RandomStreams()
+_srng = df.th.sandbox.rng_mrg.MRG_RandomStreams()
 
-class Dropout(Module):
+
+class Dropout(df.Module):
     def __init__(self, dropout):
-        Module.__init__(self)
+        df.Module.__init__(self)
         self.dropout = dropout
 
     def symb_forward(self, symb_input):
@@ -18,7 +17,7 @@ class Dropout(Module):
             mask = _srng.binomial((symb_input.shape[0], symb_input.shape[1]),
                                   p=(1. - self.dropout),
                                   dtype='int32'
-                                  ).astype(_th.config.floatX).dimshuffle(*shuffle_shape)
+                                  ).astype(df.floatX).dimshuffle(*shuffle_shape)
 
             return symb_input / (1. - self.dropout) * mask
         else:

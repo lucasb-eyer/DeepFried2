@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-from .Optimizer import Optimizer
-from ..utils import create_param_state_as
-
-from theano.tensor import sqrt
+import DeepFried2 as df
 
 
-class AdaDelta(Optimizer):
+class AdaDelta(df.Optimizer):
     """
     Implements Matt Zeiler's "Adaptive Learningrate" method, aka. AdaDelta.
     The paper itself is really neat, and both very convincing and practical.
@@ -36,17 +33,17 @@ class AdaDelta(Optimizer):
     """
 
     def __init__(self, rho, eps=1e-7, lr=1):
-        Optimizer.__init__(self, rho=rho, eps=eps, lr=lr)
+        df.Optimizer.__init__(self, rho=rho, eps=eps, lr=lr)
 
     def get_updates(self, params, grads, rho, eps, lr):
         updates = []
 
         for param, grad in zip(params, grads):
-            g2_state = create_param_state_as(param, prefix='g2_')
-            d2_state = create_param_state_as(param, prefix='d2_')
+            g2_state = df.utils.create_param_state_as(param, prefix='g2_')
+            d2_state = df.utils.create_param_state_as(param, prefix='d2_')
 
             new_g2 = rho*g2_state + (1-rho)*grad*grad
-            up = lr * sqrt((d2_state+eps) / (new_g2+eps)) * grad
+            up = lr * df.T.sqrt((d2_state+eps) / (new_g2+eps)) * grad
             new_d2 = rho*d2_state + (1-rho)*up*up
 
             updates.append((g2_state, new_g2))

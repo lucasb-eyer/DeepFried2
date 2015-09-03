@@ -1,19 +1,16 @@
-from .Module import Module
-
-import theano.sandbox.cuda.dnn as _dnn
-import theano.sandbox.cuda.basic_ops as _cuops
+import DeepFried2 as df
 
 
 def spatial_softmax(img, algo, mode):
-    img = _cuops.gpu_contiguous(img)
-    return _dnn.GpuDnnSoftmax(tensor_format='bc01', algo=algo, mode=mode)(img)
+    img = df.th.sandbox.cuda.basic_ops.gpu_contiguous(img)
+    return df.th.sandbox.cuda.dnn.GpuDnnSoftmax(tensor_format='bc01', algo=algo, mode=mode)(img)
 
 
-class SpatialSoftMaxCUDNN(Module):
+class SpatialSoftMaxCUDNN(df.Module):
     def __init__(self, algo='accurate', mode='channel'):
         # algo: 'fast' is straightforward softmax, 'accurate' is shifting inputs to avoid overflow.
         # mode: 'instance' is a softmax per image (across C,W,H), 'channel' is a softmax per pixel per image (across C).
-        Module.__init__(self)
+        df.Module.__init__(self)
         self.algo = algo
         self.mode = mode
 

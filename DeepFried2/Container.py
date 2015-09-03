@@ -1,23 +1,21 @@
-from ..layers import Module
-
-from DeepFried2.utils import aslist as _aslist
+import DeepFried2 as df
 
 
-class Container(Module):
+class Container(df.Module):
 
     def __init__(self, *modules):
-        Module.__init__(self)
+        df.Module.__init__(self)
 
         self.modules = []
         self.add(*modules)
 
     def evaluate(self):
-        Module.evaluate(self)
+        df.Module.evaluate(self)
         for module in self.modules:
             module.evaluate()
 
     def training(self):
-        Module.training(self)
+        df.Module.training(self)
         for module in self.modules:
             module.training()
 
@@ -38,8 +36,8 @@ class Container(Module):
         return stat_updates
 
     def add(self, *modules):
-        assert all(isinstance(m, Module) for m in modules), "`Container`s can only contain objects subtyping `Module`."
+        assert all(isinstance(m, df.Module) for m in modules), "`Container`s can only contain objects subtyping `df.Module`."
         self.modules += modules
 
     def __getitem__(self, slice_):
-        return type(self)(*_aslist(self.modules[slice_]))
+        return type(self)(*df.utils.aslist(self.modules[slice_]))

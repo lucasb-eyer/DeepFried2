@@ -1,12 +1,6 @@
-from . import Module
-
-import theano.tensor as _T
+import DeepFried2 as df
 
 
-class SoftMax(Module):
-
-    def __init__(self):
-        Module.__init__(self)
-
+class SoftMax(df.Module):
     def symb_forward(self, symb_input):
-        return _T.nnet.softmax(symb_input)
+        return df.T.nnet.softmax(symb_input)

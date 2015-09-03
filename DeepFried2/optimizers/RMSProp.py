@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-from .Optimizer import Optimizer
-from ..utils import create_param_state_as
-
-from theano.tensor import sqrt
+import DeepFried2 as df
 
 
-class RMSProp(Optimizer):
+class RMSProp(df.Optimizer):
     """
     Implements Hinton's "RMSProp" method presented in his Coursera lecture 6.5.
     Essentially, it sits right in-between AdaGrad and AdaDelta by being a
@@ -22,15 +19,15 @@ class RMSProp(Optimizer):
     """
 
     def __init__(self, lr, rho, eps=1e-7):
-        Optimizer.__init__(self, lr=lr, rho=rho, eps=eps)
+        df.Optimizer.__init__(self, lr=lr, rho=rho, eps=eps)
 
     def get_updates(self, params, grads, lr, rho, eps):
         updates = []
 
         for param, grad in zip(params, grads):
-            g2_state = create_param_state_as(param)
+            g2_state = df.utils.create_param_state_as(param)
             new_g2 = rho*g2_state + (1-rho)*grad*grad
             updates.append((g2_state, new_g2))
-            updates.append((param, param - lr/sqrt(new_g2+eps) * grad))
+            updates.append((param, param - lr/df.T.sqrt(new_g2+eps) * grad))
 
         return updates

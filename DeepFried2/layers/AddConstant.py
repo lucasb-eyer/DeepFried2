@@ -1,7 +1,7 @@
-from .Module import Module
+import DeepFried2 as df
 
 
-class AddConstant(Module):
+class AddConstant(df.Module):
     def __init__(self, scalar):
         self.scalar = scalar
 

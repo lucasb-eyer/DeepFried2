@@ -1,14 +1,10 @@
-from .Module import Module
-from DeepFried2.init import const, xavier
+import DeepFried2 as df
 from DeepFried2.utils import create_param_and_grad
 
-import theano as _th
-import numpy as _np
 
-
-class SpatialConvolution(Module):
-    def __init__(self, n_input_plane, n_output_plane, k_w, k_h, d_w=1, d_h=1, with_bias=True, initW=xavier(), initB=const(0), border_mode='valid', imshape=None):
-        Module.__init__(self)
+class SpatialConvolution(df.Module):
+    def __init__(self, n_input_plane, n_output_plane, k_w, k_h, d_w=1, d_h=1, with_bias=True, initW=df.init.xavier(), initB=df.init.const(0), border_mode='valid', imshape=None):
+        df.Module.__init__(self)
         self.n_input_plane = n_input_plane
         self.n_output_plane = n_output_plane
         self.k_w = k_w
@@ -27,7 +23,7 @@ class SpatialConvolution(Module):
             self.bias, self.grad_bias = create_param_and_grad(n_output_plane, initB, name='bconv_{}'.format(n_output_plane))
 
     def symb_forward(self, symb_input):
-        conv_output = _th.tensor.nnet.conv.conv2d(symb_input, self.weight,
+        conv_output = df.T.nnet.conv.conv2d(symb_input, self.weight,
             image_shape=(None, self.n_input_plane) + (self.imshape or (None, None)),
             filter_shape=self.w_shape,
             border_mode=self.border_mode,

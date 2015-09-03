@@ -1,6 +1,4 @@
-import theano as _th
-import theano.tensor as _T
-
+import DeepFried2 as df
 from DeepFried2.utils import make_tensors_or_tensors, aslist
 
 from collections import OrderedDict as _OrderedDict
@@ -64,7 +62,7 @@ class Module:
         if self.training_mode not in self._fn_forward:
             symb_in = make_tensors_or_tensors(data, 'X')
             symb_out = self.symb_forward(symb_in)
-            self._fn_forward[self.training_mode] = _th.function(
+            self._fn_forward[self.training_mode] = df.th.function(
                 inputs=aslist(symb_in),
                 outputs=symb_out
             )
@@ -79,10 +77,10 @@ class Module:
             symb_err = loss.symb_forward(symb_out, symb_tgt)
 
             params, grads = self.unique_parameters()
-            symb_grads = _th.grad(cost=symb_err, wrt=params)
+            symb_grads = df.th.grad(cost=symb_err, wrt=params)
 
             grads_updates = [(grad, grad + symb_grad) for grad, symb_grad in zip(grads, symb_grads)]
-            self._fn_accum_grads[self.training_mode] = _th.function(
+            self._fn_accum_grads[self.training_mode] = df.th.function(
                 inputs=aslist(symb_in) + aslist(symb_tgt),
                 outputs=symb_err,
                 updates=grads_updates
@@ -124,7 +122,7 @@ class Module:
                         print("WARNING: Dropped the following stat-update because that variable got multiple updates: {}".format(upd[0]))
                 stat_updates = uniq_updates
 
-            self._fn_accum_stats[self.training_mode] = _th.function(
+            self._fn_accum_stats[self.training_mode] = df.th.function(
                 inputs=aslist(symb_in),
                 updates=stat_updates
             )

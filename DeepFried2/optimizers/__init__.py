@@ -1,4 +1,3 @@
-from .Optimizer import Optimizer
 from .SGD import SGD
 from .Momentum import Momentum
 from .Nesterov import Nesterov

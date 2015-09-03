@@ -1,4 +1,4 @@
-import theano.tensor as _T
+import DeepFried2 as df
 
 
 class BCECriterion:
@@ -14,5 +14,5 @@ class BCECriterion:
         assert symb_targets.ndim == symb_input.ndim, "The targets of `{}` should have the same dimensionality as the net's output. You likely want to do something like `tgt[:,None]`.".format(self.__class__.__name__)
 
         if self.clip is not None:
-            symb_input = _T.clip(symb_input, self.clip, 1-self.clip)
-        return _T.mean(_T.sum(_T.nnet.binary_crossentropy(symb_input, symb_targets), axis=1))
+            symb_input = df.T.clip(symb_input, self.clip, 1-self.clip)
+        return df.T.mean(df.T.sum(df.T.nnet.binary_crossentropy(symb_input, symb_targets), axis=1))

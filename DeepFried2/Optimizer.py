@@ -1,5 +1,4 @@
-import theano.tensor as _T
-import theano as _th
+import DeepFried2 as df
 
 
 class Optimizer:
@@ -13,9 +12,9 @@ class Optimizer:
         if model not in self.states:
             params, grads = model.unique_parameters()
             # TODO: Not only scalar
-            hyperparams = {name: _T.scalar(name) for name in self.hyperparams}
+            hyperparams = {name: df.T.scalar(name) for name in self.hyperparams}
             updates = self.get_updates(params, grads, **hyperparams)
-            self.states[model] = _th.function(
+            self.states[model] = df.th.function(
                 inputs=list(hyperparams.values()),
                 updates=updates
             )

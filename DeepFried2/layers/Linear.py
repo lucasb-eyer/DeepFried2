@@ -1,15 +1,13 @@
-from .Module import Module
-from DeepFried2.init import const, xavier
+import DeepFried2 as df
 from DeepFried2.utils import create_param_and_grad
 
 import numpy as _np
-import theano as _th
 
 
-class Linear(Module):
+class Linear(df.Module):
 
-    def __init__(self, nin, nout, with_bias=True, initW=xavier(), initB=const(0)):
-        Module.__init__(self)
+    def __init__(self, nin, nout, with_bias=True, initW=df.init.xavier(), initB=df.init.const(0)):
+        df.Module.__init__(self)
 
         self.nin = nin
         self.nout = nout
@@ -20,7 +18,7 @@ class Linear(Module):
             self.bias, self.grad_bias = create_param_and_grad(nout, initB, name='blin_{}'.format(nout))
 
     def symb_forward(self, symb_input):
-        out = _th.tensor.dot(symb_input, self.weight)
+        out = df.T.dot(symb_input, self.weight)
 
         if self.with_bias:
             out += self.bias

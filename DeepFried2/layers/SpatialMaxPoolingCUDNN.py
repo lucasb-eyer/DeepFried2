@@ -1,11 +1,9 @@
-import theano.sandbox.cuda.dnn as _dnn
-
-from .Module import Module
+import DeepFried2 as df
 
 
-class SpatialMaxPoolingCUDNN(Module):
+class SpatialMaxPoolingCUDNN(df.Module):
     def __init__(self, k_w, k_h, d_w=None, d_h=None, pad_w=0, pad_h=0):
-        Module.__init__(self)
+        df.Module.__init__(self)
         self.k_w = k_w
         self.k_h = k_h
 
@@ -23,7 +21,7 @@ class SpatialMaxPoolingCUDNN(Module):
         self.pad_h = pad_h
 
     def symb_forward(self, symb_input):
-        return _dnn.dnn_pool(
+        return df.th.sandbox.cuda.dnn.dnn_pool(
             img=symb_input,
             ws=(self.k_w, self.k_h),
             stride=(self.d_w, self.d_h),

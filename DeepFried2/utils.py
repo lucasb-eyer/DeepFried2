@@ -1,28 +1,28 @@
-import theano as _th
+import DeepFried2 as df
 import numpy as _np
 
 
-def create_param(shape, init, fan=None, name=None, type=_th.config.floatX):
-    return _th.shared(init(shape, fan).astype(type), name=name)
+def create_param(shape, init, fan=None, name=None, type=df.floatX):
+    return df.th.shared(init(shape, fan).astype(type), name=name)
 
 
-def create_param_and_grad(shape, init, fan=None, name=None, type=_th.config.floatX):
+def create_param_and_grad(shape, init, fan=None, name=None, type=df.floatX):
     val = init(shape, fan).astype(type)
-    param = _th.shared(val, name=name)
+    param = df.th.shared(val, name=name)
     grad_name = 'grad_' + name if name is not None else None
-    grad_param = _th.shared(_np.zeros_like(val), name=grad_name)
+    grad_param = df.th.shared(_np.zeros_like(val), name=grad_name)
     return param, grad_param
 
 
 def create_param_state_as(other, initial_value=0, prefix='state_for_'):
-    return _th.shared(other.get_value()*0 + initial_value,
+    return df.th.shared(other.get_value()*0 + initial_value,
         broadcastable=other.broadcastable,
         name=prefix + str(other.name)
     )
 
 
 def make_tensor(ndim, name):
-    return _th.tensor.TensorType(_th.config.floatX, (False,) * ndim)(name)
+    return df.th.tensor.TensorType(df.floatX, (False,) * ndim)(name)
 
 
 def make_tensors_or_tensors(data_or_datas, name):

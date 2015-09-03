@@ -1,26 +1,23 @@
-from .Module import Module
-from DeepFried2.init import const
+import DeepFried2 as df
 from DeepFried2.utils import create_param, create_param_and_grad
 
 import numpy as _np
-import theano as _th
-import theano.tensor as _T
 
 
-class BatchNormalization(Module):
+class BatchNormalization(df.Module):
     def __init__(self, n_features, eps=None):
-        Module.__init__(self)
+        df.Module.__init__(self)
 
-        self.weight, self.grad_weight = create_param_and_grad(n_features, const(1), name='W_BN_{}'.format(n_features))
-        self.bias, self.grad_bias = create_param_and_grad(n_features, const(0), name='b_BN_{}'.format(n_features))
+        self.weight, self.grad_weight = create_param_and_grad(n_features, df.init.const(1), name='W_BN_{}'.format(n_features))
+        self.bias, self.grad_bias = create_param_and_grad(n_features, df.init.const(0), name='b_BN_{}'.format(n_features))
 
-        self.inference_weight = create_param(n_features, const(1), name='W_BN_{}_inf'.format(n_features))
-        self.inference_bias = create_param(n_features, const(0), name='b_BN_{}_inf'.format(n_features))
+        self.inference_weight = create_param(n_features, df.init.const(1), name='W_BN_{}_inf'.format(n_features))
+        self.inference_bias = create_param(n_features, df.init.const(0), name='b_BN_{}_inf'.format(n_features))
 
         # These are buffers for collecting the minibatch statistics.
-        self.buffer_variance = create_param(n_features, const(1), name='BN_var_{}'.format(n_features))
-        self.buffer_mean = create_param(n_features, const(0), name='BN_mean_{}'.format(n_features))
-        self.buffer_counts = _th.shared(_np.asarray(0, dtype=_th.config.floatX), name='BN_count_{}'.format(n_features))
+        self.buffer_variance = create_param(n_features, df.init.const(1), name='BN_var_{}'.format(n_features))
+        self.buffer_mean = create_param(n_features, df.init.const(0), name='BN_mean_{}'.format(n_features))
+        self.buffer_counts = df.th.shared(_np.asarray(0, dtype=df.floatX), name='BN_count_{}'.format(n_features))
 
         self.eps = eps or 1e-5
 
@@ -36,10 +33,10 @@ class BatchNormalization(Module):
             axis += (2, 3)
 
         if self.training_mode:
-            self.batch_mean = _th.tensor.mean(symb_input, axis=axis)
-            self.batch_var = _th.tensor.var(symb_input, axis=axis)
+            self.batch_mean = df.T.mean(symb_input, axis=axis)
+            self.batch_var = df.T.var(symb_input, axis=axis)
 
-            return (symb_input - self.batch_mean.dimshuffle(*d_shuffle)) / _th.tensor.sqrt(self.batch_var + self.eps).dimshuffle(*d_shuffle) * self.weight.dimshuffle(*d_shuffle) + self.bias.dimshuffle(*d_shuffle)
+            return (symb_input - self.batch_mean.dimshuffle(*d_shuffle)) / df.T.sqrt(self.batch_var + self.eps).dimshuffle(*d_shuffle) * self.weight.dimshuffle(*d_shuffle) + self.bias.dimshuffle(*d_shuffle)
         else:
             return symb_input * self.inference_weight.dimshuffle(*d_shuffle) + self.inference_bias.dimshuffle(*d_shuffle)
 
@@ -59,12 +56,12 @@ class BatchNormalization(Module):
         return stat_updates
 
     def training(self):
-        Module.training(self)
+        df.Module.training(self)
         self.buffer_counts.set_value(0)
         self.batch_mean = None
         self.batch_var = None
 
     def evaluate(self):
-        Module.evaluate(self)
+        df.Module.evaluate(self)
         self.inference_weight.set_value(self.weight.get_value() / _np.sqrt(self.buffer_variance.get_value() + self.eps))
         self.inference_bias.set_value(self.bias.get_value() - self.inference_weight.get_value() * self.buffer_mean.get_value())

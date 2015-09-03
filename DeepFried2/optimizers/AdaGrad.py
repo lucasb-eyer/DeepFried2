@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-from .Optimizer import Optimizer
-from ..utils import create_param_state_as
-
-from theano.tensor import sqrt
+import DeepFried2 as df
 
 
-class AdaGrad(Optimizer):
+class AdaGrad(df.Optimizer):
     """
     Implements Duchi's "Adaptive Subgradient" method, aka AdaGrad.
     Chris Dyer's "Notes on AdaGrad" are pretty awesome for practical purposes.
@@ -30,7 +27,7 @@ class AdaGrad(Optimizer):
     """
 
     def __init__(self, lr, eps=1e-7):
-        Optimizer.__init__(self, lr=lr)
+        df.Optimizer.__init__(self, lr=lr)
 
         # eps is only needed as numeric value for initializing state and it's
         # not possible to initialize state using symbolic variables.
@@ -40,9 +37,9 @@ class AdaGrad(Optimizer):
         updates = []
 
         for param, grad in zip(params, grads):
-            g2_state = create_param_state_as(param, initial_value=self.eps)
+            g2_state = df.utils.create_param_state_as(param, initial_value=self.eps)
             new_g2 = g2_state + grad*grad
             updates.append((g2_state, new_g2))
-            updates.append((param, param - lr/sqrt(new_g2) * grad))
+            updates.append((param, param - lr/df.T.sqrt(new_g2) * grad))
 
         return updates

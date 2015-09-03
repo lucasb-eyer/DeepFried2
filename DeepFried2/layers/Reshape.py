@@ -1,9 +1,9 @@
-from .Module import Module
+import DeepFried2 as df
 
 
-class Reshape(Module):
+class Reshape(df.Module):
     def __init__(self, *new_shape):
-        Module.__init__(self)
+        df.Module.__init__(self)
         self.new_shape = new_shape
 
     def symb_forward(self, symb_input):

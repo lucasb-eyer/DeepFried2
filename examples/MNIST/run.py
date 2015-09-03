@@ -1,5 +1,4 @@
 import DeepFried2 as df
-import DeepFried2.optimizers as optim
 
 from train import *
 from test import *
@@ -12,16 +11,14 @@ def main(params):
     test_set_x, test_set_y = test_set
 
     model = lenet()
-
     criterion = df.ClassNLLCriterion()
-
-    optimiser = df.optimizers.SGD(lr=params['lr'])
+    optimiser = df.SGD(lr=params['lr'])
 
     for epoch in range(100):
         model.training()
         train(train_set_x, train_set_y, model, optimiser, criterion, epoch, params['batch_size'], 'train')
-        train(train_set_x, train_set_y, model, optimiser, criterion, epoch, params['batch_size'], 'stats')
 
+        train(train_set_x, train_set_y, model, optimiser, criterion, epoch, params['batch_size'], 'stats')
         model.evaluate()
         validate(test_set_x, test_set_y, model, epoch, params['batch_size'])
 

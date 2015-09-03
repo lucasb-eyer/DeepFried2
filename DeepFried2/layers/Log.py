@@ -1,8 +1,6 @@
-from .Module import Module
-
-import theano.tensor as _T
+import DeepFried2 as df
 
 
-class Log(Module):
+class Log(df.Module):
     def symb_forward(self, symb_input):
-        return _T.log(symb_input)
+        return df.T.log(symb_input)

@@ -1,13 +1,11 @@
-from .Container import Container
-
-import theano.tensor as _T
+import DeepFried2 as df
 
 
-class Concat(Container):
+class Concat(df.Container):
     def __init__(self, axis=1):
-        Container.__init__(self)
+        df.Container.__init__(self)
         self.axis = axis
 
     def symb_forward(self, symb_inputs):
         assert isinstance(symb_inputs, (list, tuple)), "Input to `Concat` container needs to be a tuple or a list."
-        return _T.concatenate(symb_inputs, self.axis)
+        return df.T.concatenate(symb_inputs, self.axis)

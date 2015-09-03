@@ -1,9 +1,7 @@
-from .Module import Module
-
-import theano.tensor as _T
+import DeepFried2 as df
 
 
-class Tanh(Module):
+class Tanh(df.Module):
 
     def symb_forward(self, symb_input):
-        return _T.tanh(symb_input)
+        return df.T.tanh(symb_input)

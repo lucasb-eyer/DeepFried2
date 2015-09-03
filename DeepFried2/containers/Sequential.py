@@ -1,7 +1,7 @@
-from .Container import Container
+import DeepFried2 as df
 
 
-class Sequential(Container):
+class Sequential(df.Container):
     def symb_forward(self, symb_input):
         symb_output = symb_input
         for module in self.modules:
