@@ -1,6 +1,3 @@
 __pycache__
-
-Beacon8.egg-info/
-
-# Example data files/folders
-examples/MNIST/mnist.pkl.gz
+*.pyc
+DeepFried2.egg-info/
