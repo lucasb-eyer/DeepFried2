@@ -1,5 +1,5 @@
 import DeepFried2 as df
-from DeepFried2.utils import make_tensors_or_tensors, aslist
+from DeepFried2.utils import make_tensor_or_tensors, aslist
 
 from collections import OrderedDict as _OrderedDict
 
@@ -60,7 +60,7 @@ class Module:
 
     def forward(self, data):
         if self.training_mode not in self._fn_forward:
-            symb_in = make_tensors_or_tensors(data, 'X')
+            symb_in = make_tensor_or_tensors(data, 'X')
             symb_out = self.symb_forward(symb_in)
             self._fn_forward[self.training_mode] = df.th.function(
                 inputs=aslist(symb_in),
@@ -71,8 +71,8 @@ class Module:
 
     def accumulate_gradients(self, data_in, data_tgt, loss):
         if self.training_mode not in self._fn_accum_grads:
-            symb_in = make_tensors_or_tensors(data_in, 'X')
-            symb_tgt = make_tensors_or_tensors(data_tgt, 'T')
+            symb_in = make_tensor_or_tensors(data_in, 'X')
+            symb_tgt = make_tensor_or_tensors(data_tgt, 'T')
             symb_out = self.symb_forward(symb_in)
             symb_err = loss.symb_forward(symb_out, symb_tgt)
 
@@ -94,7 +94,7 @@ class Module:
 
     def accumulate_statistics(self, data_in):
         if self.training_mode not in self._fn_accum_stats:
-            symb_in = make_tensors_or_tensors(data_in, 'X')
+            symb_in = make_tensor_or_tensors(data_in, 'X')
 
             # Call forward once so it can compute some variables it'll actually
             # use in the stat updates collection.

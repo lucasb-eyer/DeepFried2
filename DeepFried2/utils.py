@@ -25,7 +25,7 @@ def make_tensor(ndim, name):
     return df.th.tensor.TensorType(df.floatX, (False,) * ndim)(name)
 
 
-def make_tensors_or_tensors(data_or_datas, name):
+def make_tensor_or_tensors(data_or_datas, name):
     if isinstance(data_or_datas, (list, tuple)):
         return [make_tensor(data.ndim, name + str(i+1)) for i, data in enumerate(data_or_datas)]
     else:
