@@ -11,7 +11,7 @@ def model_head(fully_conv=True):
             df.Dropout(0.5),
             df.SpatialConvolutionCUDNN(4096, 4096, 1, 1, border='valid'), df.ReLU(),
             df.Dropout(0.5),
-            df.SpatialConvolutionCUDNN(4096, 1000, 1, 1, border='valid'), df.ReLU(),
+            df.SpatialConvolutionCUDNN(4096, 1000, 1, 1, border='valid'),
             df.SpatialSoftMaxCUDNN(),
         ]
     else:
