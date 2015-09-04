@@ -1,11 +1,11 @@
-from .Module import Module
+import DeepFried2 as df
 
 import theano.tensor as _T
 
 
-class SpatialMaxPooling3D(Module):
+class SpatialMaxPooling3D(df.Module):
     def __init__(self, k_w, k_h, k_d, d_w=None, d_h=None, d_d=None, pad_w=0, pad_h=0, pad_d=0, ignore_border=False):
-        Module.__init__(self)
+        df.Module.__init__(self)
         self.k_w = k_w
         self.k_h = k_h
         self.k_d = k_d
