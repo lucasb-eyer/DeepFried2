@@ -8,10 +8,9 @@ from model import net, lenet2
 
 
 if __name__ == "__main__":
-    print("THIS IS JUST AN EXAMPLE.")
+    print("THIS IS JUST AN EXAMPLE; DO NOT BASE DECISIONS ON THIS.")
     print("Please don't take these numbers as a benchmark.")
-    print("While the optimizer's parameters have been grid-searched,")
-    print("a fair comparison would run all experiments multiple times AND RUN MORE THAN FIVE EPOCHS.")
+    print("A fair comparison would run all experiments multiple times AND RUN MORE THAN FIVE EPOCHS.")
 
     batch_size = 64
 
@@ -45,3 +44,4 @@ if __name__ == "__main__":
     run(df.AdaGrad(lr=1e-2, eps=1e-4))
     run(df.RMSProp(lr=1e-3, rho=0.90, eps=1e-5))
     run(df.AdaDelta(rho=0.99, lr=5e-1, eps=1e-4))
+    run(df.Adam(alpha=1e-3, beta1=0.95, beta2=0.9, eps=1e-8))

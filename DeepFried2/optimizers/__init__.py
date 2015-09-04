@@ -4,3 +4,4 @@ from .Nesterov import Nesterov
 from .AdaGrad import AdaGrad
 from .RMSProp import RMSProp
 from .AdaDelta import AdaDelta
+from .Adam import Adam

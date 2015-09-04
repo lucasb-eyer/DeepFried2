@@ -11,7 +11,7 @@ class Optimizer:
 
         if model not in self.states:
             params, grads = model.unique_parameters()
-            # TODO: Not only scalar
+            # TODO: Not only scalar, e.g. Adam might profit from integer t
             hyperparams = {name: df.T.scalar(name) for name in self.hyperparams}
             updates = self.get_updates(params, grads, **hyperparams)
             self.states[model] = df.th.function(
