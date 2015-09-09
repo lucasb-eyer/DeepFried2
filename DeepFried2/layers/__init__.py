@@ -6,6 +6,7 @@ from .Linear import Linear
 from .Log import Log
 from .ReLU import ReLU
 from .Reshape import Reshape
+from .Permute import Permute
 from .Sigmoid import Sigmoid
 from .Softmax import SoftMax
 from .SpatialConvolution import SpatialConvolution
