@@ -1,14 +1,11 @@
 import DeepFried2 as df
-from DeepFried2.init import const, xavier
 from DeepFried2.utils import create_param_and_grad
 
-import theano as _th
 from theano.tensor.nnet import conv3d2d
-import numpy as _np
 
 
 class SpatialConvolution3D(df.Module):
-    def __init__(self, n_input_vol, n_output_vol, k_w, k_h, k_d, with_bias=True, initW=xavier(), initB=const(0), border_mode='valid', volshape=None):
+    def __init__(self, n_input_vol, n_output_vol, k_w, k_h, k_d, with_bias=True, initW=df.init.xavier(), initB=df.init.const(0), border_mode='valid', volshape=None):
         df.Module.__init__(self)
         self.n_input_vol = n_input_vol
         self.n_output_vol = n_output_vol
