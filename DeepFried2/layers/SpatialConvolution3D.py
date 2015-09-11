@@ -27,6 +27,9 @@ class SpatialConvolution3D(df.Module):
 
         """symb_input shape: (n_input, depth, channels, height, width)"""
 
+        if symb_input.ndim < 5:
+            raise NotImplementedError('3D convolution requires a dimension >= 5')
+
         conv_output = conv3d2d.conv3d(symb_input,
                                       self.weight,
                                       filters_shape=self.w_shape,

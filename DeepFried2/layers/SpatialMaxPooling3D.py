@@ -4,7 +4,7 @@ import theano.tensor as _T
 
 
 class SpatialMaxPooling3D(df.Module):
-    def __init__(self, k_w, k_h, k_d, d_w=None, d_h=None, d_d=None, pad_w=0, pad_h=0, pad_d=0, ignore_border=False):
+    def __init__(self, k_w, k_h, k_d, d_w=None, d_h=None, d_d=None, ignore_border=False):
         df.Module.__init__(self)
         self.k_w = k_w
         self.k_h = k_h
@@ -26,28 +26,24 @@ class SpatialMaxPooling3D(df.Module):
         else:
             self.d_d = d_d
 
-        self.pad_w = pad_w
-        self.pad_h = pad_h
-        self.pad_d = pad_d
-
     def symb_forward(self, symb_input):
         """ 3d max pooling taken from github.com/lpigou/Theano-3D-ConvNet/
             (with modified shuffeling) """
-        if symb_input.ndim < 4:
-            raise NotImplementedError('max pooling 3D requires a dimension >= 3')
+        if symb_input.ndim < 5:
+            raise NotImplementedError('max pooling 3D requires a dimension >= 5')
 
         height_width_shape = symb_input.shape[-2:]
 
         batch_size = _T.prod(symb_input.shape[:-2])
         batch_size = _T.shape_padright(batch_size, 1)
 
-        new_shape = _T.cast(_T.join(0, batch_size, _T.as_tensor([1,]), height_width_shape), 'int64')
+        new_shape = _T.cast(_T.join(0, batch_size, _T.as_tensor([1,]), height_width_shape), 'int32')
 
         input_4d = _T.reshape(symb_input, new_shape, ndim=4)
 
         # downsample height and width first
         # other dimensions contribute to batch_size
-        op = _T.signal.downsample.DownsampleFactorMax((self.k_h, self.k_w), self.ignore_border)
+        op = _T.signal.downsample.DownsampleFactorMax((self.k_h, self.k_w), self.ignore_border, st=(self.d_h, self.d_w))
         output = op(input_4d)
 
         outshape = _T.join(0, symb_input.shape[:-2], output.shape[-2:])
@@ -62,12 +58,12 @@ class SpatialMaxPooling3D(df.Module):
         batch_size = _T.prod(input_depth.shape[:-2])
         batch_size = _T.shape_padright(batch_size,1)
 
-        new_shape = _T.cast(_T.join(0, batch_size, _T.as_tensor([1,]), vol_shape), 'int64')
+        new_shape = _T.cast(_T.join(0, batch_size, _T.as_tensor([1,]), vol_shape), 'int32')
         input_4D_depth = _T.reshape(input_depth, new_shape, ndim=4)
 
         # downsample depth
         # other dimensions contribute to batch_size
-        op = _T.signal.downsample.DownsampleFactorMax((1,self.k_d), self.ignore_border)
+        op = _T.signal.downsample.DownsampleFactorMax((1,self.k_d), self.ignore_border, st=(1,self.d_d))
         outdepth = op(input_4D_depth)
 
         outshape = _T.join(0, input_depth.shape[:-2], outdepth.shape[-2:])
