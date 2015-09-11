@@ -14,10 +14,10 @@ class Dropout(df.Module):
             if symb_input.ndim == 4:
                 shuffle_shape += ('x', 'x')
 
-            mask = _srng.binomial((symb_input.shape[0], symb_input.shape[1]),
+            mask = _srng.binomial(symb_input.shape,
                                   p=(1. - self.dropout),
-                                  dtype='int32'
-                                  ).astype(df.floatX).dimshuffle(*shuffle_shape)
+                                  dtype=df.floatX
+                                  )
 
             return symb_input / (1. - self.dropout) * mask
         else:
