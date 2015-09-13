@@ -1,3 +1,3 @@
 from .ClassNLLCriterion import ClassNLLCriterion
 from .BCECriterion import BCECriterion
-from .RMSECriterion import RMSECriterion
+from .RMSECriterion import RMSECriterion, MSECriterion
