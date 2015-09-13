@@ -5,7 +5,7 @@ def xavier(gain=1):
         assert fan is not None, "The parameter's `fan` needs to be specified when using Xavier initialization."
 
         fan_mean = _np.mean(fan)
-        bound = _np.sqrt(3./fan_mean)
+        bound = gain * _np.sqrt(3./fan_mean)
         return _np.random.uniform(low=-bound, high=bound, size=shape)
     return init
 
@@ -14,7 +14,8 @@ def xavierN(gain=1):
         assert fan is not None, "The parameter's `fan` needs to be specified when using Xavier initialization."
 
         fan_mean = _np.mean(fan)
-        return _np.sqrt(1./fan_mean) * _np.random.randn(*shape)
+        eff_std = gain * _np.sqrt(1./fan_mean)
+        return eff_std * _np.random.randn(*shape)
     return init
 
 def xavierSigm(gain=1):
