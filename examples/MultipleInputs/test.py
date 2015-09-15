@@ -29,9 +29,9 @@ def validate(Xdata, ydata, model, epoch, batch_size):
 
         for i in range((len(batchleft) + batch_size - 1) // batch_size):
             Xleft  = Xdata[batchleft [i*batch_size : (i+1)*batch_size]].astype(df.floatX)
-            yleft  = ydata[batchleft [i*batch_size : (i+1)*batch_size]].astype(df.floatX)
+            yleft  = ydata[batchleft [i*batch_size : (i+1)*batch_size]]
             Xright = Xdata[batchright[i*batch_size : (i+1)*batch_size]].astype(df.floatX)
-            yright = ydata[batchright[i*batch_size : (i+1)*batch_size]].astype(df.floatX)
+            yright = ydata[batchright[i*batch_size : (i+1)*batch_size]]
 
             preds = 0.5 < np.squeeze(model.forward((Xleft, Xright)))
             nerrors += sum(preds != (yleft == yright))

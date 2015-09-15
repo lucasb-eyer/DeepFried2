@@ -14,9 +14,9 @@ def train(Xtrain, ytrain, model, optimiser, criterion, epoch, batch_size, mode='
         indices = shuffle[ibatch*batch_size*2 : (ibatch+1)*batch_size*2]
 
         Xleft = Xtrain[indices[:batch_size]].astype(df.floatX)
-        yleft = ytrain[indices[:batch_size]].astype(df.floatX)
+        yleft = ytrain[indices[:batch_size]]
         Xright = Xtrain[indices[batch_size:]].astype(df.floatX)
-        yright = ytrain[indices[batch_size:]].astype(df.floatX)
+        yright = ytrain[indices[batch_size:]]
 
         # Need to put the targets into a column because of the way BCE works.
         y = (yleft == yright)[:,None].astype(df.floatX)

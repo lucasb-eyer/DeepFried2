@@ -1,5 +1,5 @@
+import DeepFried2 as df
 import numpy as np
-import theano as th
 
 
 def test(X, y, model, batch_size):
@@ -8,7 +8,7 @@ def test(X, y, model, batch_size):
     nerrors = 0
     for j in range((len(X) + batch_size - 1) // batch_size):
         # Note: numpy correctly handles the size of the last minibatch.
-        miniX = X[j*batch_size : (j+1)*batch_size].astype(th.config.floatX)
+        miniX = X[j*batch_size : (j+1)*batch_size].astype(df.floatX)
         miniy = y[j*batch_size : (j+1)*batch_size]
 
         pred_probas = model.forward(miniX)

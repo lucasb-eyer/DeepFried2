@@ -1,8 +1,8 @@
 import DeepFried2 as df
 
-from train import *
-from test import *
-from model import *
+from train import train
+from test import validate
+from model import net, lenet, lenet_cudnn
 
 
 def main(params):

@@ -1,5 +1,5 @@
+import DeepFried2 as df
 import numpy as np
-import theano as th
 
 
 def train(X, y, model, optimiser, criterion, batch_size, mode='train'):
@@ -8,8 +8,8 @@ def train(X, y, model, optimiser, criterion, batch_size, mode='train'):
 
     for j in range(len(X) // batch_size):
         indices = shuffle[j*batch_size : (j+1)*batch_size]
-        mini_batch_input = X[indices].astype(th.config.floatX)
-        mini_batch_targets = y[indices].astype(th.config.floatX)
+        mini_batch_input = X[indices].astype(df.floatX)
+        mini_batch_targets = y[indices].astype(df.floatX)
 
         if mode == 'train':
             model.zero_grad_parameters()

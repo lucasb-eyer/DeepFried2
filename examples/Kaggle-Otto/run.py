@@ -1,10 +1,11 @@
+import DeepFried2 as df
 import numpy as np
 import pandas as pd
-import DeepFried2 as df
-import DeepFried2.optimizers as optim
+
 from os.path import dirname, join as pjoin
 from sklearn.preprocessing import LabelEncoder
 from sklearn.cross_validation import train_test_split
+
 from train import train
 from test import validate
 
@@ -52,8 +53,7 @@ if __name__ == "__main__":
     model = nnet()
 
     criterion = df.ClassNLLCriterion()
-
-    optimiser = optim.Momentum(lr=0.01, momentum=0.9)
+    optimiser = df.Momentum(lr=0.01, momentum=0.9)
 
     for epoch in range(1, 1001):
         model.training()
