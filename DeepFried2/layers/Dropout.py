@@ -10,10 +10,6 @@ class Dropout(df.Module):
 
     def symb_forward(self, symb_input):
         if self.training_mode:
-            shuffle_shape = (0, 1)
-            if symb_input.ndim == 4:
-                shuffle_shape += ('x', 'x')
-
             mask = _srng.binomial(symb_input.shape,
                                   p=(1. - self.dropout),
                                   dtype=df.floatX
