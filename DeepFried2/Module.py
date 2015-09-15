@@ -128,3 +128,8 @@ class Module:
             )
 
         self._fn_accum_stats[self.training_mode](*aslist(data_in))
+
+    def clear(self):
+        self._fn_forward.clear()
+        self._fn_accum_grads.clear()
+        self._fn_accum_stats.clear()
