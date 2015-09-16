@@ -1,8 +1,9 @@
 import DeepFried2 as df
 
 
-class ClassNLLCriterion:
+class ClassNLLCriterion(df.Criterion):
     def __init__(self, clip=None):
+        df.Criterion.__init__(self)
         self.clip = clip
 
     def symb_forward(self, symb_input, symb_targets):

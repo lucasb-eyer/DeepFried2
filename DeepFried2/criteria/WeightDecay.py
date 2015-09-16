@@ -1,6 +1,8 @@
 import DeepFried2 as df
 
 from itertools import chain
+# NOTE: We intentionally don't make these inherit from df.Criterion as we don't
+#       really want them to be used as standalone criteria.
 
 
 class L1WeightDecay:

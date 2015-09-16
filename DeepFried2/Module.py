@@ -75,7 +75,7 @@ class Module:
             symb_in = make_tensor_or_tensors(data_in, 'X')
             symb_tgt = make_tensor_or_tensors(data_tgt, 'T')
             symb_out = self.symb_forward(symb_in)
-            symb_err = loss.symb_forward(symb_out, symb_tgt)
+            symb_err = loss.full_symb_forward(symb_out, symb_tgt)
 
             params, grads = self.unique_parameters()
             symb_grads = df.th.grad(cost=symb_err, wrt=params)
