@@ -1,10 +1,12 @@
 import DeepFried2 as df
+from DeepFried2.utils import make_tensor_or_tensors, aslist
 
 
 class Criterion:
 
     def __init__(self):
         self.penalties = []
+        self._fn_forward = {}
 
     def symb_forward(self, symb_input, symb_target):
         raise NotImplementedError("`{}` needs to implement `symb_forward` method.".format(df.typename(self)))
@@ -24,3 +26,21 @@ class Criterion:
             cost += w*p.symb_forward()
 
         return cost
+
+    def forward(self, num_input, num_target, with_penalties=True):
+        # NOTE: using the GPU for such trivial computations as most costs
+        # is actually somewhat slower (e.g. for RMSE: 1.2ms vs. 0.2ms). So
+        # ideally, we'd like to compile a CPU-version here, but I don't know how!
+        if with_penalties not in self._fn_forward:
+            symb_in = make_tensor_or_tensors(num_input, 'Y')
+            symb_tgt = make_tensor_or_tensors(num_target, 'T')
+            if with_penalties:
+                symb_out = self.full_symb_forward(symb_in, symb_tgt)
+            else:
+                symb_out = self.symb_forward(symb_in, symb_tgt)
+            self._fn_forward[with_penalties] = df.th.function(
+                inputs=aslist(symb_in) + aslist(symb_tgt),
+                outputs=symb_out
+            )
+
+        return self._fn_forward[with_penalties](*(aslist(num_input)+aslist(num_target)))
