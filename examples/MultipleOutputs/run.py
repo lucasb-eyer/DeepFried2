@@ -17,13 +17,11 @@ def main(params):
     )
 
     crit = df.ParallelCriterion(
-        (1, df.ClassNLLCriterion()),
-        (1, df.ClassNLLCriterion()),
-        penalties=[
-            (1e-4, df.L1WeightDecay(model)),
-            (1e-5, df.L2WeightDecay(model)),
-        ]
+        (0.75, df.ClassNLLCriterion()),
+        df.ClassNLLCriterion() # No weight defaults to one.
     )
+    crit.add_penalty(1e-4, df.L1WeightDecay(model))
+    crit.add_penalty(1e-5, df.L2WeightDecay(model))
 
     optim = df.AdaDelta(params['adadelta_rho'])
 
