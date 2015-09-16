@@ -58,3 +58,7 @@ def aslist(what):
         return list(what)
     else:
         return [what]
+
+
+def typename(obj):
+    return type(obj).__name__

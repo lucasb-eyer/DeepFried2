@@ -11,7 +11,7 @@ class BCECriterion:
 
     def symb_forward(self, symb_input, symb_targets):
         # A classic mistake, at least for myself.
-        assert symb_targets.ndim == symb_input.ndim, "The targets of `{}` should have the same dimensionality as the net's output. You likely want to do something like `tgt[:,None]`.".format(self.__class__.__name__)
+        assert symb_targets.ndim == symb_input.ndim, "The targets of `{}` should have the same dimensionality as the net's output. You likely want to do something like `tgt[:,None]`.".format(df.typename(self))
 
         if self.clip is not None:
             symb_input = df.T.clip(symb_input, self.clip, 1-self.clip)

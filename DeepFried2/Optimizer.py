@@ -22,7 +22,7 @@ class Optimizer:
         self.states[model](**self.hyperparams)
 
     def get_updates(self, params, grads):
-        raise NotImplementedError
+        raise NotImplementedError("`{}` needs to implement `get_updates` method.".format(df.typename(self)))
 
     def __repr__(self):
-        return type(self).__name__ + "(" + ", ".join(k+"="+str(v) for k,v in self.hyperparams.items()) + ")"
+        return df.typename(self) + "(" + ", ".join(k+"="+str(v) for k,v in self.hyperparams.items()) + ")"
