@@ -29,6 +29,9 @@ class Container(df.Module):
 
         return params, grads
 
+    def may_decay(self):
+        return sum((m.may_decay() for m in self.modules), [])
+
     def get_stat_updates(self):
         stat_updates = []
         for module in self.modules:

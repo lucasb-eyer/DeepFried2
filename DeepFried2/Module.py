@@ -50,6 +50,14 @@ class Module:
             list(_OrderedDict.fromkeys(grads).keys()),
         )
 
+    def may_decay(self):
+        flags = []
+        if hasattr(self, 'weight'):
+            flags += [True]
+        if hasattr(self, 'bias'):
+            flags += [False]
+        return flags
+
     def evaluate(self):
         self.training_mode = False
 
