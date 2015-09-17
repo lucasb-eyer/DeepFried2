@@ -2,6 +2,7 @@ import DeepFried2 as df
 from DeepFried2.utils import make_tensor_or_tensors, aslist
 
 from collections import OrderedDict as _OrderedDict
+import numpy as _np
 
 class Module:
 
@@ -21,7 +22,7 @@ class Module:
     def zero_grad_parameters(self):
         _, grads = self.unique_parameters()  # Here, it's just a matter of performance. But even then, not really.
         for grad in grads:
-            grad.set_value(0 * grad.get_value())
+            grad.set_value(_np.zeros_like(grad.get_value()))
 
     def parameters(self):
         params, grads = [], []
