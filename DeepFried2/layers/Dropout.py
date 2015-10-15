@@ -1,6 +1,7 @@
 import DeepFried2 as df
+from theano.sandbox.rng_mrg import MRG_RandomStreams
 
-_srng = df.th.sandbox.rng_mrg.MRG_RandomStreams()
+_srng = MRG_RandomStreams()
 
 
 class Dropout(df.Module):
