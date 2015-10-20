@@ -4,17 +4,12 @@ import DeepFried2 as df
 def spatial_softmax(img, algo, mode):
     # check if we have 3D input
     if img.ndim == 5:
-        """symb_input shape: (n_input, depth, channels, height, width)"""
-        # shape: bdc01
-        vol_shape = img.shape
         # shape: bcd01
-        vol = df.T.basic.swapaxes(img, 1, 2)
+        vol_shape = img.shape
         # shape: bcd(0*1)
         vol = df.T.flatten(vol, outdim=4)
         vol = df.th.sandbox.cuda.basic_ops.gpu_contiguous(vol)
         res = df.th.sandbox.cuda.dnn.GpuDnnSoftmax(tensor_format='bc01', algo=algo, mode=mode)(vol)
-        # shape: bdc(0*1)
-        res = df.T.basic.swapaxes(res, 1, 2)
         # shape: bdc01
         return res.reshape(vol_shape)
     else:
