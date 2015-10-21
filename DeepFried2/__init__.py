@@ -10,6 +10,7 @@ from .layers import *
 from .Container import Container
 from .containers import *
 
+from .Criterion import Criterion
 from .criteria import *
 
 from .Optimizer import Optimizer
