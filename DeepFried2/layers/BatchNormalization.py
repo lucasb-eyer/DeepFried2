@@ -32,8 +32,8 @@ class BatchNormalization(df.Module):
             d_shuffle += ('x', 'x')
             axis += (2, 3)
         elif symb_input.ndim == 5:
-            d_shuffle = ('x', 'x', 0, 'x', 'x')
-            axis = (0, 1, 3, 4)
+            d_shuffle += ('x', 'x', 'x')
+            axis += (2, 3, 4)
 
         if self.training_mode:
             self.batch_mean = df.T.mean(symb_input, axis=axis)

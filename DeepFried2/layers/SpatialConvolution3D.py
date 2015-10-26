@@ -25,17 +25,23 @@ class SpatialConvolution3D(df.Module):
 
     def symb_forward(self, symb_input):
 
-        """symb_input shape: (n_input, depth, channels, height, width)"""
+        """symb_input shape: (n_input, channels, depth, height, width)"""
 
         if symb_input.ndim < 5:
             raise NotImplementedError('3D convolution requires a dimension >= 5')
+
+        # shuffle bcd01 -> bdc01
+        symb_input = symb_input.swapaxes(1,2)
 
         conv_output = conv3d2d.conv3d(symb_input,
                                       self.weight,
                                       filters_shape=self.w_shape,
                                       border_mode=self.border_mode)
 
+        # shuffle bdc01 -> bcd01
+        conv_output = conv_output.swapaxes(1,2)
+
         if self.with_bias:
-            return conv_output + self.bias.dimshuffle('x', 'x', 0, 'x', 'x')
+            return conv_output + self.bias.dimshuffle('x', 0, 'x', 'x', 'x')
         else:
             return conv_output
