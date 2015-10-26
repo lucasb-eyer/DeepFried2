@@ -28,7 +28,8 @@ class SpatialMaxPooling3D(df.Module):
 
     def symb_forward(self, symb_input):
         """ 3d max pooling taken from github.com/lpigou/Theano-3D-ConvNet/
-            (with modified shuffeling) """
+            (with modified shuffeling)
+            symb_input shape: (n_input, channels, depth, height, width)"""
         if symb_input.ndim < 5:
             raise NotImplementedError('max pooling 3D requires a dimension >= 5')
 
@@ -51,7 +52,7 @@ class SpatialMaxPooling3D(df.Module):
 
         vol_dim = symb_input.ndim
 
-        shufl = (list(range(vol_dim-4)) + [vol_dim-2]+[vol_dim-1]+[vol_dim-3]+[vol_dim-4])
+        shufl = (list(range(vol_dim-4)) + [vol_dim-2]+[vol_dim-1]+[vol_dim-4]+[vol_dim-3])
         input_depth = out.dimshuffle(shufl)
         vol_shape = input_depth.shape[-2:]
 
@@ -67,6 +68,6 @@ class SpatialMaxPooling3D(df.Module):
         outdepth = op(input_4D_depth)
 
         outshape = _T.join(0, input_depth.shape[:-2], outdepth.shape[-2:])
-        shufl = (list(range(vol_dim-4)) + [vol_dim-1]+[vol_dim-2]+[vol_dim-4]+[vol_dim-3])
+        shufl = (list(range(vol_dim-4)) + [vol_dim-2]+[vol_dim-1]+[vol_dim-4]+[vol_dim-3])
 
         return _T.reshape(outdepth, outshape, ndim=symb_input.ndim).dimshuffle(shufl)
