@@ -10,7 +10,7 @@ def spatial_softmax(img, algo, mode):
         vol = df.T.flatten(img, outdim=4)
         vol = df.th.sandbox.cuda.basic_ops.gpu_contiguous(vol)
         res = df.th.sandbox.cuda.dnn.GpuDnnSoftmax(tensor_format='bc01', algo=algo, mode=mode)(vol)
-        # shape: bdc01
+        # shape: bcd01
         return res.reshape(vol_shape)
     else:
         img = df.th.sandbox.cuda.basic_ops.gpu_contiguous(img)
