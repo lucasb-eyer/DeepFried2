@@ -1,4 +1,5 @@
 import DeepFried2 as df
+from theano.tensor.signal.downsample import max_pool_2d
 
 
 class SpatialMaxPooling(df.Module):
@@ -22,7 +23,7 @@ class SpatialMaxPooling(df.Module):
         self.pad_h = pad_h
 
     def symb_forward(self, symb_input):
-        return df.T.signal.downsample.max_pool_2d(
+        return max_pool_2d(
             symb_input,
             ds=(self.k_h, self.k_w),
             ignore_border=self.ignore_border,
