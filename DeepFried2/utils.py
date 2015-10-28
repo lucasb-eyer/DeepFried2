@@ -62,3 +62,14 @@ def aslist(what):
 
 def typename(obj):
     return type(obj).__name__
+
+
+def pad(symb_input, padding):
+    assert symb_input.ndim == len(padding), "symb_input and padding must have the same dimensionality"
+
+    padded_shape = tuple((s+2*p) for s,p in zip(symb_input.shape, padding))
+    padded_input = df.T.zeros(padded_shape)
+
+    slicing = [slice(None) if p == 0 else slice(p,s+p) for s,p in zip(symb_input.shape, padding)]
+
+    return df.T.set_subtensor(padded_input[slicing], symb_input)

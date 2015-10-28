@@ -2,7 +2,7 @@ import DeepFried2 as df
 
 from train import train
 from test import validate
-from model import net, lenet, lenet_cudnn
+from model import net, lenet, lenet_same, lenet_cudnn
 
 
 def main(params):
