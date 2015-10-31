@@ -2,8 +2,9 @@ import numpy as _np
 
 
 def const(value):
+    dtype = _np.array(value).dtype  # Silence a numpy FutureWarning.
     def init(shape, fan):
-        return _np.full(shape, value)
+        return _np.full(shape, value, dtype=dtype)
     return init
 
 
