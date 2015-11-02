@@ -1,5 +1,6 @@
 import DeepFried2 as df
 import numpy as _np
+from warnings import warn as _warn
 
 
 def create_param(shape, init, fan=None, name=None, type=df.floatX):
@@ -21,15 +22,26 @@ def create_param_state_as(other, initial_value=0, prefix='state_for_'):
     )
 
 
-def make_tensor(ndim, name):
-    return df.th.tensor.TensorType(df.floatX, (False,) * ndim)(name)
+def _check_dtype_mistake(dtype):
+    """
+    It's a very common mistake (at least for me) to pass-in a float64 when I
+    really want to pass in a `floatX`, and it would go unnoticed and slow-down
+    the computations a lot if I wouldn't check it here.
+    """
+    if _np.issubdtype(dtype, _np.floating) and dtype != df.floatX:
+        _warn("Input array of floating-point dtype {} != df.floatX detected. Is this really what you want?".format(dtype))
+
+
+def make_tensor(dtype, ndim, name):
+    _check_dtype_mistake(dtype)
+    return df.th.tensor.TensorType(dtype, (False,) * ndim)(name)
 
 
 def make_tensor_or_tensors(data_or_datas, name):
     if isinstance(data_or_datas, (list, tuple)):
-        return [make_tensor(data.ndim, name + str(i+1)) for i, data in enumerate(data_or_datas)]
+        return [make_tensor(data.dtype, data.ndim, name + str(i+1)) for i, data in enumerate(data_or_datas)]
     else:
-        return make_tensor(data_or_datas.ndim, name)
+        return make_tensor(data_or_datas.dtype, data_or_datas.ndim, name)
 
 
 def count_params(module):
