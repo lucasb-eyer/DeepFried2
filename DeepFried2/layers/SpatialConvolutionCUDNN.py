@@ -1,5 +1,6 @@
 import DeepFried2 as df
 from DeepFried2.utils import create_param_and_grad
+from theano.sandbox.cuda import dnn
 
 
 class SpatialConvolutionCUDNN(df.Module):
@@ -36,7 +37,7 @@ class SpatialConvolutionCUDNN(df.Module):
             self.bias, self.grad_bias = create_param_and_grad(n_output_plane, initB, name='bconv_{}'.format(n_output_plane))
 
     def symb_forward(self, symb_input):
-        conv_output = df.th.sandbox.cuda.dnn.dnn_conv(
+        conv_output = dnn.dnn_conv(
             img=symb_input,
             kerns=self.weight,
             border_mode=self.border,
