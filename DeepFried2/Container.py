@@ -45,3 +45,10 @@ class Container(df.Module):
 
     def __getitem__(self, slice_):
         return type(self)(*df.utils.aslist(self.modules[slice_]))
+
+    def __getstate__(self):
+        return [m.__getstate__() for m in self.modules]
+
+    def __setstate__(self, state):
+        for m, s in zip(self.modules, state):
+            m.__setstate__(s)

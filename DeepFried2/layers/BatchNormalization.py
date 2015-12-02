@@ -68,3 +68,13 @@ class BatchNormalization(df.Module):
         df.Module.evaluate(self)
         self.inference_weight.set_value(self.weight.get_value() / _np.sqrt(self.buffer_variance.get_value() + self.eps))
         self.inference_bias.set_value(self.bias.get_value() - self.inference_weight.get_value() * self.buffer_mean.get_value())
+
+    def __getstate__(self):
+        regular = df.Module.__getstate__(self)
+        return [b.get_value() for b in (self.buffer_mean, self.buffer_variance, self.buffer_counts)] + regular
+
+    def __setstate__(self, state):
+        istate = iter(state)
+        for b, s in zip((self.buffer_mean, self.buffer_variance, self.buffer_counts), istate):
+            b.set_value(s)
+        df.Module.__setstate__(self, istate)

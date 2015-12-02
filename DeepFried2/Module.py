@@ -142,3 +142,10 @@ class Module:
         self._fn_forward.clear()
         self._fn_accum_grads.clear()
         self._fn_accum_stats.clear()
+
+    def __getstate__(self):
+        return [p.get_value() for p in self.unique_parameters()[0]]
+
+    def __setstate__(self, state):
+        for p, s in zip(self.unique_parameters()[0], state):
+            p.set_value(s)
