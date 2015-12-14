@@ -3,9 +3,18 @@ import DeepFried2 as df
 
 class ParallelCriterion(df.Criterion):
     # TODO: Might actually want the weights to be shared variables so we can change their values on-the-fly!
-    def __init__(self, *weighted_criteria, repeat_target=False):
+    def __init__(self, *weighted_criteria, **kw):
+        """
+        Allowed keyword arguments are:
+
+        - `repeat_target`:
+            - `False` (default) means that as many targes need to be provided
+              to `accumulate_gradients` as there are criteria.
+            - `True` means that a single target needs to be provided, which
+              will be used for all of the criteria.
+        """
         df.Criterion.__init__(self)
-        self.repeat_target = repeat_target
+        self.repeat_target = kw.get('repeat_target', False)
         self.criteria = []
 
         for wc in weighted_criteria:
