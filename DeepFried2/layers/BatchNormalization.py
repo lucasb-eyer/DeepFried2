@@ -1,12 +1,23 @@
 import DeepFried2 as df
-from DeepFried2.utils import create_param, create_param_and_grad
+from DeepFried2.utils import create_param, create_param_and_grad, aslist
 
 import numpy as _np
 
 
 class BatchNormalization(df.Module):
-    def __init__(self, n_features, eps=None):
+    def __init__(self, n_features, eps=1e-5):
+        """
+        - `n_features` may be an integer (#features, #feature-maps for images) or a tuple.
+            - If a single integer, it indicates the size of the 1-axis, i.e. first feature-axis.
+              This is the only axis that will be normalized using statistics across all other axes.
+            - If a tuple, it indicates the sizes of multiple axes (starting at 1) which are
+              considered feature-axes and will consequently be normalized over statistics across all other axes.
+        - `eps` is a small number which is added to the variance in order to
+          avoid computing sqrt(0) for features with zero variance.
+        """
         df.Module.__init__(self)
+
+        self.shape = tuple(aslist(n_features))
 
         self.weight, self.grad_weight = create_param_and_grad(n_features, df.init.const(1), name='W_BN_{}'.format(n_features))
         self.bias, self.grad_bias = create_param_and_grad(n_features, df.init.const(0), name='b_BN_{}'.format(n_features))
@@ -25,15 +36,19 @@ class BatchNormalization(df.Module):
         self.batch_var = None
 
     def symb_forward(self, symb_input):
-        d_shuffle = ('x', 0)
-        axis = (0,)
+        # Over which axis to normalize. This is at least 0 (batch-dimension)...
+        axis = [0]
 
-        if symb_input.ndim == 4:
-            d_shuffle += ('x', 'x')
-            axis += (2, 3)
-        elif symb_input.ndim == 5:
-            d_shuffle += ('x', 'x', 'x')
-            axis += (2, 3, 4)
+        # ...then, do not normalize over the `self.shape` dimensions but do over
+        # the remaining ones. Take for example 2D images, for which we also
+        # want to normalize over the spatial dimensions, e.g. (2,3).
+        axis += list(range(len(self.shape)+1, symb_input.ndim))
+
+        # And for the dimshuffle, similar story. Put 'x' on the axes we're normalizing.
+        d_shuffle = ['x'] + list(range(len(self.shape))) + ['x']*(symb_input.ndim-len(self.shape)-1)
+
+        # For example, for the usual case of images where dimensions are
+        # (B,C,H,W), axis == [0, 2, 3] and d_shuffle == ['x', 0, 'x', 'x']
 
         if self.training_mode:
             self.batch_mean = df.T.mean(symb_input, axis=axis)
