@@ -14,6 +14,7 @@ from .SpatialConvolution3D import SpatialConvolution3D
 from .SpatialConvolutionCUDNN import SpatialConvolutionCUDNN
 from .SpatialConvolution3DCUDNN import SpatialConvolution3DCUDNN
 from .BackwardsConvolution3DCUDNN import BackwardsConvolution3DCUDNN
+from .BackwardsConvolutionCUDNN import BackwardsConvolutionCUDNN
 from .SpatialMaxPooling import SpatialMaxPooling
 from .SpatialMaxPooling3D import SpatialMaxPooling3D
 from .SpatialMaxPoolingCUDNN import SpatialMaxPoolingCUDNN
