@@ -2,29 +2,25 @@ import DeepFried2 as df
 
 
 class SpatialMaxPoolingCUDNN(df.Module):
-    def __init__(self, k_w, k_h, d_w=None, d_h=None, pad_w=0, pad_h=0):
+    def __init__(self, window_size, stride=None, padding=None):
         df.Module.__init__(self)
-        self.k_w = k_w
-        self.k_h = k_h
+        self.window_size = window_size
 
-        if d_w is None:
-            self.d_w = self.k_w
+        if stride is None:
+            self.stride = window_size
         else:
-            self.d_w = d_w
+            self.stride = stride
 
-        if d_h is None:
-            self.d_h = self.k_h
+        if padding is None:
+            self.padding = tuple([0]*len(window_size))
         else:
-            self.d_h = d_h
-
-        self.pad_w = pad_w
-        self.pad_h = pad_h
+            self.padding = padding
 
     def symb_forward(self, symb_input):
         return df.th.sandbox.cuda.dnn.dnn_pool(
             img=symb_input,
-            ws=(self.k_w, self.k_h),
-            stride=(self.d_w, self.d_h),
+            ws=self.window_size,
+            stride=self.stride,
             mode='max',
-            pad=(self.pad_w, self.pad_h)
+            pad=self.padding
         )
