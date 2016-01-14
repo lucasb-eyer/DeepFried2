@@ -2,9 +2,10 @@ import DeepFried2 as df
 from DeepFried2.utils import create_param_and_grad
 from theano.sandbox.cuda import dnn
 
+import numpy as np
 
 class SpatialConvolutionCUDNN(df.Module):
-    def __init__(self, n_input_plane, n_output_plane, k_w, k_h, d_w=1, d_h=1, pad_w=0, pad_h=0, mode='cross', with_bias=True, initW=df.init.xavier(), initB=df.init.const(0), border=None):
+    def __init__(self, n_input_plane, n_output_plane, filter_size, stride=(1,1), padding=(0,0), mode='cross', with_bias=True, initW=df.init.xavier(), initB=df.init.const(0), border=None):
         # mode='cross' is the default in Lasagne[1], Torch[2], matConvNet[3], Caffee[4].
         #
         # 1: https://github.com/Lasagne/Lasagne/blob/63d44a0d/lasagne/layers/dnn.py#L299
@@ -16,36 +17,42 @@ class SpatialConvolutionCUDNN(df.Module):
         df.Module.__init__(self)
         self.n_input_plane = n_input_plane
         self.n_output_plane = n_output_plane
-        self.k_w = k_w
-        self.k_h = k_h
-        self.d_w = d_w
-        self.d_h = d_h
+        self.filter_size = filter_size
+        self.stride = stride
         self.mode = mode
         self.with_bias = with_bias
 
+        assert len(self.stride) == len(self.filter_size), 'The dimensionality of the stride and the filter size should match.'
         # 'same' is a (common) shortcut for "zero-padding so that outshape == inshape".
-        self.border = border or (pad_h, pad_w)
+        self.border = border or padding
         if self.border == 'same':
-            assert self.k_w % 2 == 1 and self.k_h % 2 == 1, "'same' convolution only supports odd filter sizes."
-            self.border = ((self.k_h-1)//2, (self.k_w-1)//2)
+            assert all(k % 2 == 1 for k in self.filter_size), "'same' convolution only supports odd filter sizes."
 
-        w_shape = (n_output_plane, n_input_plane, k_h, k_w)
-        w_fan = (n_input_plane*k_w*k_h, n_output_plane*k_w*k_h)
+            self.border = tuple( (k - 1)//2 for k in self.filter_size )
 
-        self.weight, self.grad_weight = create_param_and_grad(w_shape, initW, fan=w_fan, name='Wconv_{},{}@{}x{}'.format(n_input_plane, n_output_plane, k_w, k_h))
+        assert len(self.border) == len(self.stride), 'The dimensionality of the stride and the padding should match.'
+
+        w_shape = (n_output_plane, n_input_plane) + self.filter_size
+        w_fan = (np.prod(self.filter_size)*n_input_plane, np.prod(self.filter_size)*n_output_plane)
+
+        param_name = 'Wconv_{},{}@{}' + 'x{}'*(len(w_shape) - 3)
+        self.weight, self.grad_weight = create_param_and_grad(w_shape, initW, fan=w_fan, name=param_name.format(*w_shape))
         if self.with_bias:
             self.bias, self.grad_bias = create_param_and_grad(n_output_plane, initB, name='bconv_{}'.format(n_output_plane))
 
     def symb_forward(self, symb_input):
-        conv_output = dnn.dnn_conv(
+        conv = dnn.dnn_conv3d if symb_input.ndim == 5 else dnn.dnn_conv
+
+        conv_output = conv(
             img=symb_input,
             kerns=self.weight,
             border_mode=self.border,
-            subsample=(self.d_h, self.d_w),
+            subsample=self.stride,
             conv_mode=self.mode
         )
 
         if self.with_bias:
-            return conv_output + self.bias.dimshuffle('x', 0, 'x', 'x')
+            d_shuffle = ('x', 0) + tuple('x') * (symb_input.ndim-2)
+            return conv_output + self.bias.dimshuffle(*d_shuffle)
         else:
             return conv_output
