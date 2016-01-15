@@ -10,7 +10,6 @@ from .Permute import Permute
 from .Sigmoid import Sigmoid
 from .SoftMax import SoftMax
 from .SpatialConvolution import SpatialConvolution
-from .SpatialConvolution3D import SpatialConvolution3D
 from .SpatialConvolutionCUDNN import SpatialConvolutionCUDNN
 from .BackwardsConvolutionCUDNN import BackwardsConvolutionCUDNN
 from .SpatialMaxPooling import SpatialMaxPooling
