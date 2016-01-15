@@ -13,7 +13,6 @@ from .SpatialConvolution import SpatialConvolution
 from .SpatialConvolutionCUDNN import SpatialConvolutionCUDNN
 from .BackwardsConvolutionCUDNN import BackwardsConvolutionCUDNN
 from .SpatialMaxPooling import SpatialMaxPooling
-from .SpatialMaxPooling3D import SpatialMaxPooling3D
 from .SpatialMaxPoolingCUDNN import SpatialMaxPoolingCUDNN
 from .SpatialSoftMaxCUDNN import SpatialSoftMaxCUDNN
 from .UpSample import UpSample

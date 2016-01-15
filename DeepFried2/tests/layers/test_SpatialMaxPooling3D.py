@@ -39,43 +39,43 @@ class TestSpatialMaxPooling3D(unittest.TestCase):
         ], dtype=df.floatX)
 
     def testBasic(self):
-        X = self.X[None,:,None,:,:]
-        Z = self.Z[None,:,None,:,:]
-        P = df.SpatialMaxPooling3D(4,3,2).forward(X)
+        X = self.X[None,None,:,:,:]
+        Z = self.Z[None,None,:,:,:]
+        P = df.SpatialMaxPooling((2,3,4)).forward(X)
         np.testing.assert_array_equal(P, Z)
 
     def testMiniBatches(self):
-        X = self.X[None,:,None,:,:]
+        X = self.X[None,None,:,:,:]
         X = np.concatenate((X, X+1), axis=0)
-        Z = self.Z[None,:,None,:,:]
+        Z = self.Z[None,None,:,:,:]
         Z = np.concatenate((Z, Z+1), axis=0)
 
-        P = df.SpatialMaxPooling3D(4,3,2).forward(X)
+        P = df.SpatialMaxPooling((2,3,4)).forward(X)
         np.testing.assert_array_equal(P, Z)
 
     def testDataChannels(self):
-        X = self.X[None,:,None,:,:]
-        X = np.concatenate((X, X+1), axis=2)
-        Z = self.Z[None,:,None,:,:]
-        Z = np.concatenate((Z, Z+1), axis=2)
+        X = self.X[None,None,:,:,:]
+        X = np.concatenate((X, X+1), axis=1)
+        Z = self.Z[None,None,:,:,:]
+        Z = np.concatenate((Z, Z+1), axis=1)
 
-        P = df.SpatialMaxPooling3D(4,3,2).forward(X)
+        P = df.SpatialMaxPooling((2,3,4)).forward(X)
         np.testing.assert_array_equal(P, Z)
 
     def testIgnoreBorder(self):
         X = np.pad(self.X, ((0,1),(0,2),(0,3)), mode='constant', constant_values=999)
-        X = X[None,:,None,:,:]
-        ZT = self.Z[None,:,None,:,:]
+        X = X[None,None,:,:,:]
+        ZT = self.Z[None,None,:,:,:]
         ZF = np.pad(self.Z, ((0,1),(0,1),(0,1)), mode='constant', constant_values=999)
-        ZF = ZF[None,:,None,:,:]
-        P = df.SpatialMaxPooling3D(4,3,2, ignore_border=True).forward(X)
+        ZF = ZF[None,None,:,:,:]
+        P = df.SpatialMaxPooling((2,3,4), ignore_border=True).forward(X)
         np.testing.assert_array_equal(P, ZT)
-        P = df.SpatialMaxPooling3D(4,3,2, ignore_border=False).forward(X)
+        P = df.SpatialMaxPooling((2,3,4), ignore_border=False).forward(X)
         np.testing.assert_array_equal(P, ZF)
 
     def testStride(self):
         # Add another slice along depth
-        X = np.concatenate((self.X, self.X[1:2]+100), axis=0)[None,:,None,:,:]
+        X = np.concatenate((self.X, self.X[1:2]+100), axis=0)[None,None,:,:,:]
         Z = np.array([
             [
                 [24, 70, 72],
@@ -88,6 +88,6 @@ class TestSpatialMaxPooling3D(unittest.TestCase):
                 [136, 180, 180],
                 [136, 184, 184],
             ],
-        ], dtype=df.floatX)[None,:,None,:,:]
-        P = df.SpatialMaxPooling3D(4,3,2, 2,1,1).forward(X)
+        ], dtype=df.floatX)[None,None,:,:,:]
+        P = df.SpatialMaxPooling((2,3,4), (1,1,2)).forward(X)
         np.testing.assert_array_equal(P, Z)
