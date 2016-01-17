@@ -28,12 +28,12 @@ class Module:
         params, grads = [], []
 
         if hasattr(self, 'weight'):
-            assert hasattr(self, 'grad_weight'), "The layer {} has a `weight` variable but no `grad_weight`, you probably forget to implement it.".format(df.classname(self))
+            assert hasattr(self, 'grad_weight'), "The layer {} has a `weight` variable but no `grad_weight`, you probably forget to implement it.".format(df.utils.typename(self))
             params += [self.weight]
             grads += [self.grad_weight]
 
         if hasattr(self, 'bias'):
-            assert hasattr(self, 'grad_bias'), "The layer {} has a `bias` variable but no `grad_bias`, you probably forget to implement it.".format(df.classname(self))
+            assert hasattr(self, 'grad_bias'), "The layer {} has a `bias` variable but no `grad_bias`, you probably forget to implement it.".format(df.utils.typename(self))
             params += [self.bias]
             grads += [self.grad_bias]
 
@@ -65,7 +65,7 @@ class Module:
         self.training_mode = True
 
     def symb_forward(self, symb_input):
-        raise NotImplementedError("`{}` needs to implement `symb_forward` method.".format(df.typename(self)))
+        raise NotImplementedError("`{}` needs to implement `symb_forward` method.".format(df.utils.typename(self)))
 
     def forward(self, data):
         if self.training_mode not in self._fn_forward:

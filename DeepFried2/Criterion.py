@@ -1,5 +1,5 @@
 import DeepFried2 as df
-from DeepFried2.utils import make_tensor_or_tensors, aslist, typename
+from DeepFried2.utils import make_tensor_or_tensors, aslist
 
 
 class Criterion:
@@ -10,10 +10,10 @@ class Criterion:
 
     def _assert_same_dim(self, symb_input, symb_target):
         # A classic mistake, at least for myself.
-        assert symb_target.ndim == symb_input.ndim, "The targets of `{}` should have the same dimensionality as the net's output. You likely want to do something like `tgt[:,None]`.".format(typename(self))
+        assert symb_target.ndim == symb_input.ndim, "The targets of `{}` should have the same dimensionality as the net's output. You likely want to do something like `tgt[:,None]`.".format(df.utils.typename(self))
 
     def symb_forward(self, symb_input, symb_target):
-        raise NotImplementedError("`{}` needs to implement `symb_forward` method.".format(df.typename(self)))
+        raise NotImplementedError("`{}` needs to implement `symb_forward` method.".format(df.utils.typename(self)))
 
     # TODO: Might actually want the weights to be shared variables so we can change their values on-the-fly!
     def add_penalty(self, weight_or_pen, pen=None):

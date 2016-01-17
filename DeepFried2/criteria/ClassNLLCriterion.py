@@ -23,4 +23,4 @@ class ClassNLLCriterion(df.Criterion):
             return df.T.mean(-df.T.sum(symb_targets * df.T.log(p_y), axis=symb_input.ndim-1))
 
         else:
-            assert False, "Mismatch in dimensionalities of `{}` input and targets.".format(df.typename(self))
+            assert False, "Mismatch in dimensionalities of `{}` input and targets.".format(df.utils.typename(self))

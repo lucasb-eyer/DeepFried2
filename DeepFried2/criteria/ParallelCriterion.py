@@ -33,6 +33,6 @@ class ParallelCriterion(df.Criterion):
         if self.repeat_target:
             symb_targets = [symb_targets] * len(symb_inputs)
 
-        assert len(symb_inputs) == len(symb_targets) == len(self.criteria), "`{}` mismatch in number of inputs ({}), criteria ({}) and targets ({})" .format(df.typename(self), len(symb_inputs), len(self.criteria), len(symb_targets))
+        assert len(symb_inputs) == len(symb_targets) == len(self.criteria), "`{}` mismatch in number of inputs ({}), criteria ({}) and targets ({})" .format(df.utils.typename(self), len(symb_inputs), len(self.criteria), len(symb_targets))
 
         return sum(w*c.symb_forward(i, t) for (w,c), i, t in zip(self.criteria, symb_inputs, symb_targets))
