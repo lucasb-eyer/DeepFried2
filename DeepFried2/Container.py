@@ -1,4 +1,6 @@
 import DeepFried2 as df
+from collections import OrderedDict as _OrderedDict
+from itertools import chain as _chain
 
 
 class Container(df.Module):
@@ -19,24 +21,17 @@ class Container(df.Module):
         for module in self.modules:
             module.training()
 
-    def parameters(self):
-        params, grads = [], []
+    def parameters(self, *a, **kw):
+        params = _chain.from_iterable(m.parameters(*a, **kw) for m in self.modules)
 
-        for module in self.modules:
-            mod_params, mod_grads = module.parameters()
-            params += mod_params
-            grads += mod_grads
-
-        return params, grads
-
-    def may_decay(self):
-        return sum((m.may_decay() for m in self.modules), [])
+        # We actually need to remove duplicates from the list of parameters
+        # (and their corresponding gradients) in order to support reusing
+        # the same layer at multiple places in the graph,
+        # e.g. do weight sharing.
+        return list(_OrderedDict.fromkeys(params).keys())
 
     def get_stat_updates(self):
-        stat_updates = []
-        for module in self.modules:
-            stat_updates += module.get_stat_updates()
-        return stat_updates
+        return _chain.from_iterable(m.get_stat_updates() for m in self.modules)
 
     def add(self, *modules):
         for m in modules:

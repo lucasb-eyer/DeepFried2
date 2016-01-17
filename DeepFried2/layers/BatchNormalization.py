@@ -1,5 +1,5 @@
 import DeepFried2 as df
-from DeepFried2.utils import create_param, create_param_and_grad, aslist
+from DeepFried2.utils import aslist
 
 import numpy as _np
 
@@ -19,16 +19,16 @@ class BatchNormalization(df.Module):
 
         self.shape = tuple(aslist(n_features))
 
-        self.weight, self.grad_weight = create_param_and_grad(n_features, df.init.const(1), name='W_BN_{}'.format(n_features))
-        self.bias, self.grad_bias = create_param_and_grad(n_features, df.init.const(0), name='b_BN_{}'.format(n_features))
+        self.W = self._addparam(n_features, df.init.const(1), name='W_BN_{}'.format(n_features))
+        self.b = self._addparam(n_features, df.init.const(0), name='b_BN_{}'.format(n_features), decay=False)
 
-        self.inference_weight = create_param(n_features, df.init.const(1), name='W_BN_{}_inf'.format(n_features))
-        self.inference_bias = create_param(n_features, df.init.const(0), name='b_BN_{}_inf'.format(n_features))
+        self.Winf = self._addparam(n_features, df.init.const(1), name='W_BN_{}_inf'.format(n_features), learn=False)
+        self.binf = self._addparam(n_features, df.init.const(0), name='b_BN_{}_inf'.format(n_features), learn=False)
 
         # These are buffers for collecting the minibatch statistics.
-        self.buffer_variance = create_param(n_features, df.init.const(1), name='BN_var_{}'.format(n_features))
-        self.buffer_mean = create_param(n_features, df.init.const(0), name='BN_mean_{}'.format(n_features))
-        self.buffer_counts = df.th.shared(_np.asarray(0, dtype=df.floatX), name='BN_count_{}'.format(n_features))
+        self.buf_var = df.th.shared(_np.full(n_features, 1, df.floatX), name='BN_var_{}'.format(n_features))
+        self.buf_mean = df.th.shared(_np.full(n_features, 0, df.floatX), name='BN_mean_{}'.format(n_features))
+        self.buf_count = df.th.shared(_np.asarray(0, dtype=df.floatX), name='BN_count_{}'.format(n_features))
 
         self.eps = eps or 1e-5
 
@@ -46,6 +46,9 @@ class BatchNormalization(df.Module):
 
         # And for the dimshuffle, similar story. Put 'x' on the axes we're normalizing.
         d_shuffle = ['x'] + list(range(len(self.shape))) + ['x']*(symb_input.ndim-len(self.shape)-1)
+        # Shorthand:
+        def dshuf(x):
+            return x.dimshuffle(*d_shuffle)
 
         # For example, for the usual case of images where dimensions are
         # (B,C,H,W), axis == [0, 2, 3] and d_shuffle == ['x', 0, 'x', 'x']
@@ -54,42 +57,39 @@ class BatchNormalization(df.Module):
             self.batch_mean = df.T.mean(symb_input, axis=axis)
             self.batch_var = df.T.var(symb_input, axis=axis)
 
-            return (symb_input - self.batch_mean.dimshuffle(*d_shuffle)) / df.T.sqrt(self.batch_var + self.eps).dimshuffle(*d_shuffle) * self.weight.dimshuffle(*d_shuffle) + self.bias.dimshuffle(*d_shuffle)
+            symb_input = (symb_input - dshuf(self.batch_mean)) / dshuf(df.T.sqrt(self.batch_var + self.eps))
+
+            return symb_input * dshuf(self.W.param) + dshuf(self.b.param)
         else:
-            return symb_input * self.inference_weight.dimshuffle(*d_shuffle) + self.inference_bias.dimshuffle(*d_shuffle)
+            return symb_input * dshuf(self.Winf.param) + dshuf(self.binf.param)
 
     def get_stat_updates(self):
         assert (self.batch_mean is not None) and (self.batch_var is not None), "You need to do a forward pass first"
 
-        stat_updates = list()
-        stat_updates.append((self.buffer_mean,
-                             (self.buffer_mean * self.buffer_counts + self.batch_mean) / (self.buffer_counts + 1.0)))
-
-        stat_updates.append((self.buffer_variance,
-                             (self.buffer_variance * self.buffer_counts + self.batch_var) / (self.buffer_counts + 1.0)))
-
-        stat_updates.append((self.buffer_counts,
-                             self.buffer_counts + 1.0))
-
-        return stat_updates
+        # Update buffer statistics with current batch's statistics.
+        return [
+            (self.buf_mean, (self.buf_mean * self.buf_count + self.batch_mean) / (self.buf_count + 1.0)),
+            (self.buf_var, (self.buf_var * self.buf_count + self.batch_var) / (self.buf_count + 1.0)),
+            (self.buf_count, self.buf_count + 1.0),
+        ]
 
     def training(self):
         df.Module.training(self)
-        self.buffer_counts.set_value(0)
+        self.buf_count.set_value(0)
         self.batch_mean = None
         self.batch_var = None
 
     def evaluate(self):
         df.Module.evaluate(self)
-        self.inference_weight.set_value(self.weight.get_value() / _np.sqrt(self.buffer_variance.get_value() + self.eps))
-        self.inference_bias.set_value(self.bias.get_value() - self.inference_weight.get_value() * self.buffer_mean.get_value())
+        self.Winf.set_value(self.W.get_value() / _np.sqrt(self.buf_var.get_value() + self.eps))
+        self.binf.set_value(self.b.get_value() - self.Winf.get_value() * self.buf_mean.get_value())
 
     def __getstate__(self):
         regular = df.Module.__getstate__(self)
-        return [b.get_value() for b in (self.buffer_mean, self.buffer_variance, self.buffer_counts)] + regular
+        return [buf.get_value() for buf in (self.buf_mean, self.buf_var, self.buf_count)] + regular
 
     def __setstate__(self, state):
         istate = iter(state)
-        for b, s in zip((self.buffer_mean, self.buffer_variance, self.buffer_counts), istate):
-            b.set_value(s)
+        for buf, val in zip((self.buf_mean, self.buf_var, self.buf_count), istate):
+            buf.set_value(val)
         df.Module.__setstate__(self, istate)

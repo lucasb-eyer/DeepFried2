@@ -43,7 +43,7 @@ def pretrained(fully_conv=True, fname=None):
     values, mean, classes = params(fully_conv, fname)
 
     # Load the pretrained parameter values into the network.
-    for p, v in zip(vgg.parameters()[0], values):
+    for p, v in zip(vgg.parameters(), values):
         p.set_value(v)
 
     return vgg, mean, classes

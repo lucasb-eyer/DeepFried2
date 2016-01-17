@@ -1,5 +1,4 @@
 import DeepFried2 as df
-from DeepFried2.utils import create_param_and_grad
 
 
 class UpSample(df.Module):

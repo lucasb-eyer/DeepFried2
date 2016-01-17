@@ -1,11 +1,11 @@
 import DeepFried2 as df
-from DeepFried2.utils import create_param_and_grad, expand
+from DeepFried2.utils import expand
 from theano.sandbox.cuda import dnn
 
 import numpy as np
 
 class SpatialConvolutionCUDNN(df.Module):
-    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border=0, mode='cross', with_bias=True, initW=df.init.xavier(), initB=df.init.const(0)):
+    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border=0, mode='cross', init=df.init.xavier(), bias=df.init.const(0)):
         # mode='cross' is the default in Lasagne[1], Torch[2], matConvNet[3], Caffee[4].
         #
         # 1: https://github.com/Lasagne/Lasagne/blob/63d44a0d/lasagne/layers/dnn.py#L299
@@ -17,7 +17,6 @@ class SpatialConvolutionCUDNN(df.Module):
         self.nchan_out = nchan_out
         self.filter_size = filter_size
         self.mode = mode
-        self.with_bias = with_bias
         self.stride = expand(stride, len(filter_size), 'stride')
         self.border = expand(border, len(filter_size), 'border')
 
@@ -28,11 +27,13 @@ class SpatialConvolutionCUDNN(df.Module):
 
         w_shape = (nchan_out, nchan_in) + self.filter_size
         w_fan = (np.prod(self.filter_size)*nchan_in, np.prod(self.filter_size)*nchan_out)
+        w_name = ('Wconv_{},{}@{}' + 'x{}'*(len(w_shape) - 3)).format(*w_shape)
+        self.W = self._addparam(w_shape, init, fan=w_fan, name=w_name)
 
-        param_name = 'Wconv_{},{}@{}' + 'x{}'*(len(w_shape) - 3)
-        self.weight, self.grad_weight = create_param_and_grad(w_shape, initW, fan=w_fan, name=param_name.format(*w_shape))
-        if self.with_bias:
-            self.bias, self.grad_bias = create_param_and_grad(nchan_out, initB, name='bconv_{}'.format(nchan_out))
+        if bias not in (None, False):
+            self.b = self._addparam(nchan_out, bias, decay=False, name='bconv_{}'.format(nchan_out))
+        else:
+            self.b = None
 
 
     def symb_forward(self, symb_input):
@@ -40,14 +41,14 @@ class SpatialConvolutionCUDNN(df.Module):
 
         conv_output = conv(
             img=symb_input,
-            kerns=self.weight,
+            kerns=self.W.param,
             border_mode=self.border,
             subsample=self.stride,
             conv_mode=self.mode
         )
 
-        if self.with_bias:
+        if self.b is not None:
             d_shuffle = ('x', 0) + tuple('x') * (symb_input.ndim-2)
-            conv_output += self.bias.dimshuffle(*d_shuffle)
+            conv_output += self.b.param.dimshuffle(*d_shuffle)
 
         return conv_output

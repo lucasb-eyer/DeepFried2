@@ -4,6 +4,8 @@ floatX = th.config.floatX
 
 import DeepFried2.init as init
 
+from .Param import Param
+
 from .Module import Module
 from .layers import *
 
