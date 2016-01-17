@@ -1,21 +1,17 @@
 import DeepFried2 as df
-from DeepFried2.utils import create_param_and_grad
+from DeepFried2.utils import create_param_and_grad, expand
 import numpy as np
 
-from theano.tensor.nnet import conv3d2d
-
 class SpatialConvolution(df.Module):
-    def __init__(self, n_input_plane, n_output_plane, filter_size, stride=(1,1), padding=(0,0), with_bias=True, initW=df.init.xavier(), initB=df.init.const(0), border_mode='valid', imshape=None):
+    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border_mode='valid', with_bias=True, initW=df.init.xavier(), initB=df.init.const(0), imshape=None):
         df.Module.__init__(self)
-        self.n_input_plane = n_input_plane
-        self.n_output_plane = n_output_plane
+        self.nchan_in = nchan_in
+        self.nchan_out = nchan_out
         self.filter_size = filter_size
-        self.stride = stride
         self.with_bias = with_bias
-        self.border_mode = border_mode or padding
-        self.imshape = imshape
-
-        assert len(self.stride) == len(self.filter_size), 'The dimensionality of the stride and the filter size should match.'
+        self.imshape = expand(imshape, len(filter_size), expand_nonnum=True, name='imshape')
+        self.stride = expand(stride, len(filter_size), name='stride')
+        self.border_mode = expand(border_mode, len(filter_size), name='border_mode')
 
         if len(self.filter_size) == 3 and any(s != 1 for s in stride):
             raise NotImplementedError('stride != 1 is not implemented for 3D convolutions')
@@ -23,55 +19,54 @@ class SpatialConvolution(df.Module):
         if len(self.filter_size) == 3 and imshape is not None:
             raise NotImplementedError('imshape is not implemented for 3D convolutions')
 
-        self.w_shape = (n_output_plane, n_input_plane) + self.filter_size
-        w_fan = (n_input_plane*np.prod(self.filter_size), n_output_plane*np.prod(self.filter_size))
+        self.w_shape = (nchan_out, nchan_in) + self.filter_size
+        w_fan = (nchan_in*np.prod(self.filter_size), nchan_out*np.prod(self.filter_size))
 
         param_name = 'Wconv_{},{}@{}' + 'x{}'*(len(self.w_shape) - 3)
         self.weight, self.grad_weight = create_param_and_grad(self.w_shape, initW, fan=w_fan, name=param_name.format(*self.w_shape))
         if self.with_bias:
-            self.bias, self.grad_bias = create_param_and_grad(n_output_plane, initB, name='bconv_{}'.format(n_output_plane))
+            self.bias, self.grad_bias = create_param_and_grad(nchan_out, initB, name='bconv_{}'.format(nchan_out))
 
     def symb_forward(self, symb_input):
         mode = self.border_mode
         input_shape = symb_input.shape
 
-        if self.border_mode == 'same':
+        # Implement 'same' convolution by padding upfront. (TODO: use theano's 'half'? Is it supported in 3d?)
+        if mode == 'same':
             if any(d != 1 for d in self.stride):
-                raise NotImplementedError("'same' is not implement for strides != 1")
-            mode = 'full'
+                raise NotImplementedError("'same' is not implement for strides != 1 (try CUDNN)")
+            mode = 'valid'
             padding = tuple( (k - 1)//2 for k in self.filter_size )
-        elif self.border_mode == 'full' and symb_input.ndim == 5:
+        # 'full' is not implemented in 3D, so work-around by padding upfront.
+        # 3D is forced to use 'valid', so we're not setting anything for that here.
+        elif mode == 'full' and symb_input.ndim == 5:
             padding = tuple( k - 1 for k in self.filter_size )
-        elif isinstance(self.border_mode, tuple):
+        # If a specific padding is set, convolution is always "normal", i.e. 'valid'.
+        elif isinstance(mode, tuple):
             mode = 'valid'
             padding = self.border_mode
-        else:
-            padding = tuple([0] * len(self.filter_size))
 
         if any(p != 0 for p in padding):
             symb_input = df.utils.pad(symb_input, (0,0) + padding)
 
         if symb_input.ndim == 5:
             # shuffle bcd01 -> bdc01
-            conv_output = conv3d2d.conv3d(symb_input.swapaxes(1,2),
+            conv_output = df.T.nnet.conv3d2d.conv3d(symb_input.swapaxes(1,2),
                     self.weight.swapaxes(1,2),
-                    border_mode='valid')
+                    border_mode='valid'
+            )
             # shuffle bdc01 -> bcd01
             conv_output = conv_output.swapaxes(1,2)
         else:
             conv_output = df.T.nnet.conv.conv2d(symb_input, self.weight,
-                    image_shape=(None, self.n_input_plane) + (self.imshape or (None, None)),
-                    filter_shape=self.w_shape,
-                    border_mode=mode,
-                    subsample=self.stride
-                    )
-
-            if self.border_mode == 'same':
-                conv_output = conv_output[:,:,padding[0]:input_shape[2]+padding[0],padding[1]:input_shape[3]+padding[1]]
-
+                image_shape=(None, self.nchan_in) + self.imshape,
+                filter_shape=self.w_shape,
+                border_mode=mode,
+                subsample=self.stride
+            )
 
         if self.with_bias:
-            d_shuffle = ('x', 0) + tuple('x') * (symb_input.ndim-2)
-            return conv_output + self.bias.dimshuffle(*d_shuffle)
-        else:
-            return conv_output
+            d_shuffle = ('x', 0) + ('x',) * (symb_input.ndim-2)
+            conv_output += self.bias.dimshuffle(*d_shuffle)
+
+        return conv_output

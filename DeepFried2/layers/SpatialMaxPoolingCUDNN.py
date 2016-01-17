@@ -12,7 +12,7 @@ class SpatialMaxPoolingCUDNN(df.Module):
             self.stride = stride
 
         if padding is None:
-            self.padding = tuple([0]*len(window_size))
+            self.padding = (0,)*len(window_size)
         else:
             self.padding = padding
 

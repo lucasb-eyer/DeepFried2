@@ -1,6 +1,7 @@
 import DeepFried2 as df
 import numpy as _np
 from warnings import warn as _warn
+from numbers import Number as _Number
 
 
 def create_param(shape, init, fan=None, name=None, type=df.floatX):
@@ -72,12 +73,24 @@ def aslist(what):
         return [what]
 
 
+def expand(tup, ndim, expand_nonnum=False, name=None):
+    if isinstance(tup, (tuple, list)) and len(tup) == ndim:
+        return tup
+
+    if isinstance(tup, _Number) or expand_nonnum:
+        return (tup,) * ndim
+
+    if not expand_nonnum:
+        return tup
+
+    raise ValueError("Bad number of dimensions{}: is {} but should be {}.".format((" for " + name) if name else "", len(tup), ndim))
+
 def typename(obj):
     return type(obj).__name__
 
 
 def pad(symb_input, padding):
-    assert symb_input.ndim == len(padding), "symb_input and padding must have the same dimensionality"
+    assert symb_input.ndim == len(padding), "symb_input ({}d) and padding ({}d) must have the same dimensionality".format(symb_input.ndim, len(padding))
 
     padded_shape = tuple((s+2*p) for s,p in zip(symb_input.shape, padding))
     padded_input = df.T.zeros(padded_shape)
