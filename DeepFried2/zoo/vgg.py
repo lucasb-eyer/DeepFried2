@@ -7,11 +7,11 @@ import numpy as np
 def model_head(fully_conv=True):
     if fully_conv:
         return [
-            df.SpatialConvolutionCUDNN( 512, 4096, 7, 7, border='valid'), df.ReLU(),
+            df.SpatialConvolutionCUDNN( 512, 4096, (7,7), border='valid'), df.ReLU(),
             df.Dropout(0.5),
-            df.SpatialConvolutionCUDNN(4096, 4096, 1, 1, border='valid'), df.ReLU(),
+            df.SpatialConvolutionCUDNN(4096, 4096, (1,1), border='valid'), df.ReLU(),
             df.Dropout(0.5),
-            df.SpatialConvolutionCUDNN(4096, 1000, 1, 1, border='valid'),
+            df.SpatialConvolutionCUDNN(4096, 1000, (1,1), border='valid'),
             df.SpatialSoftMaxCUDNN(),
         ]
     else:
@@ -39,9 +39,9 @@ def params(large=True, fully_conv=True, fname=None):
 
     mat = scipy.io.loadmat(fname)
     for l in layers:
-        W = mat['layers'][0,l][0,0][0][0,0]
+        W = mat['layers'][0,l][0,0][2][0,0]
         W = W.transpose(3,2,0,1)
-        b = mat['layers'][0,l][0,0][0][0,1]
+        b = mat['layers'][0,l][0,0][2][0,1]
         b = b.squeeze()
         params += [W, b]
 
@@ -53,9 +53,12 @@ def params(large=True, fully_conv=True, fname=None):
         params[-2] = params[-2].squeeze().T
 
     # The mean is actually a single scalar per color channel.
-    mean = mat['normalization'][0,0][0]  # This is H,W,C
-    mean = np.mean(mean, axis=(0,1))
+    # mean = mat['normalization'][0,0][0]  # This is H,W,C
+    # mean = np.mean(mean, axis=(0,1))
+    # The format seems to have changed some time.
+    mean = mat['meta']['normalization'][0,0][0,0]['averageImage'][0,0]
 
-    classes = np.array([cls[0] for cls in mat['classes'][0,0][0][0,:]])
+    # Note; there's also the key `description` which we could use as human-readable name.
+    classes = np.array([cls[0] for cls in mat['meta']['classes'][0,0][0]['name'][0][0,:]])
 
     return params, mean, classes

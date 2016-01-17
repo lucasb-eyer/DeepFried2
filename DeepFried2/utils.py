@@ -73,7 +73,7 @@ def aslist(what):
         return [what]
 
 
-def expand(tup, ndim, expand_nonnum=False, name=None):
+def expand(tup, ndim, name=None, expand_nonnum=False):
     if isinstance(tup, (tuple, list)) and len(tup) == ndim:
         return tup
 

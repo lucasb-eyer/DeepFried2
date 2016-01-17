@@ -14,6 +14,7 @@ def main(params):
     criterion = df.ClassNLLCriterion()
     optimiser = df.SGD(lr=params['lr'])
 
+    print("Compiling model...")
     for epoch in range(100):
         model.training()
         train(train_set_x, train_set_y, model, optimiser, criterion, epoch, params['batch_size'], 'train')

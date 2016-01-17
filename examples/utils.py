@@ -53,7 +53,7 @@ try:
         im = _cv2.imread(fname, flags=_cv2.IMREAD_UNCHANGED)
         if im is None:
             raise IOError("Couldn't open image file {}".format(fname))
-        return im
+        return im.astype(dtype)
 
     def imresize(im, h, w):
         if im.shape[:2] == (h, w):
