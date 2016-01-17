@@ -8,11 +8,11 @@ def create_param(shape, init, fan=None, name=None, type=df.floatX):
     return df.th.shared(init(shape, fan).astype(type), name=name)
 
 
-def create_param_and_grad(shape, init, fan=None, name=None, type=df.floatX):
+def create_param_and_grad(shape, init, fan=None, name=None, type=df.floatX, **kw):
     val = init(shape, fan).astype(type)
-    param = df.th.shared(val, name=name)
+    param = df.th.shared(val, name=name, **kw)
     grad_name = 'grad_' + name if name is not None else None
-    grad_param = df.th.shared(_np.zeros_like(val), name=grad_name)
+    grad_param = df.th.shared(_np.zeros_like(val), name=grad_name, **kw)
     return param, grad_param
 
 
