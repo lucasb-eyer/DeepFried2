@@ -1,6 +1,7 @@
 import DeepFried2 as df
 from DeepFried2.utils import create_param_and_grad, expand
 import numpy as np
+from theano.tensor.nnet import conv3d2d
 
 class SpatialConvolution(df.Module):
     def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border='valid', with_bias=True, initW=df.init.xavier(), initB=df.init.const(0), imshape=None):
