@@ -13,7 +13,7 @@ class SpatialConvolution(df.Module):
         self.stride = expand(stride, len(filter_size), 'stride')
         self.border = expand(border, len(filter_size), 'border')
 
-        if len(self.filter_size) == 3 and any(s != 1 for s in stride):
+        if len(self.filter_size) == 3 and any(s != 1 for s in self.stride):
             raise NotImplementedError('stride != 1 is not implemented for 3D convolutions')
 
         if len(self.filter_size) == 3 and imshape is not None:
