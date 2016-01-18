@@ -7,7 +7,7 @@ import numpy as np
 
 
 class BackwardsConvolutionCUDNN(df.Module):
-    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border_mode=0, mode='cross', with_bias=True, initW=df.init.xavier(), initB=df.init.const(0)):
+    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border=0, mode='cross', with_bias=True, initW=df.init.xavier(), initB=df.init.const(0)):
         # mode='cross' is the default in Lasagne[1], Torch[2], matConvNet[3], Caffee[4].
         #
         # 1: https://github.com/Lasagne/Lasagne/blob/63d44a0d/lasagne/layers/dnn.py#L299
@@ -21,7 +21,7 @@ class BackwardsConvolutionCUDNN(df.Module):
         self.mode = mode
         self.with_bias = with_bias
         self.stride = expand(stride, len(filter_size), 'stride')
-        self.border = expand(border_mode, len(filter_size), 'border_mode')
+        self.border = expand(border, len(filter_size), 'border')
 
         # 'same' is a (common) shortcut for "zero-padding so that outshape == inshape".
         if self.border == 'same':

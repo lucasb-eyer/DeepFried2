@@ -20,15 +20,15 @@ def net():
 def lenet_cudnn():
     model = df.Sequential()
     model.add(df.Reshape(-1, 1, 28, 28))
-    model.add(df.SpatialConvolutionCUDNN(1, 32, 5, 5, 1, 1, border='same', with_bias=False))
+    model.add(df.SpatialConvolutionCUDNN(1, 32, (5,5), border='same', with_bias=False))
     model.add(df.BatchNormalization(32))
     model.add(df.ReLU())
-    model.add(df.SpatialMaxPoolingCUDNN(2, 2))
+    model.add(df.SpatialMaxPoolingCUDNN((2,2)))
 
-    model.add(df.SpatialConvolutionCUDNN(32, 64, 5, 5, 1, 1, border='same', with_bias=False))
+    model.add(df.SpatialConvolutionCUDNN(32, 64, (5,5), border='same', with_bias=False))
     model.add(df.BatchNormalization(64))
     model.add(df.ReLU())
-    model.add(df.SpatialMaxPoolingCUDNN(2, 2))
+    model.add(df.SpatialMaxPoolingCUDNN((2,2)))
     model.add(df.Reshape(-1, 7*7*64))
 
     model.add(df.Linear(7*7*64, 100, with_bias=False))
@@ -43,15 +43,15 @@ def lenet_cudnn():
 def lenet_same():
     model = df.Sequential()
     model.add(df.Reshape(-1, 1, 28, 28))
-    model.add(df.SpatialConvolution(1, 32, 5, 5, 1, 1, border_mode='same', with_bias=False))
+    model.add(df.SpatialConvolution(1, 32, (5,5), border='same', with_bias=False))
     model.add(df.BatchNormalization(32))
     model.add(df.ReLU())
-    model.add(df.SpatialMaxPooling(2, 2))
+    model.add(df.SpatialMaxPooling((2,2)))
 
-    model.add(df.SpatialConvolution(32, 64, 5, 5, 1, 1, border_mode='same', with_bias=False))
+    model.add(df.SpatialConvolution(32, 64, (5,5), border='same', with_bias=False))
     model.add(df.BatchNormalization(64))
     model.add(df.ReLU())
-    model.add(df.SpatialMaxPooling(2, 2))
+    model.add(df.SpatialMaxPooling((2,2)))
     model.add(df.Reshape(-1, 7*7*64))
 
     model.add(df.Linear(7*7*64, 100, with_bias=False))
@@ -66,15 +66,15 @@ def lenet_same():
 def lenet():
     model = df.Sequential()
     model.add(df.Reshape(-1, 1, 28, 28))
-    model.add(df.SpatialConvolution(1, 32, 5, 5, 1, 1, with_bias=False))
+    model.add(df.SpatialConvolution(1, 32, (5,5), with_bias=False))
     model.add(df.BatchNormalization(32))
     model.add(df.ReLU())
-    model.add(df.SpatialMaxPooling(2, 2))
+    model.add(df.SpatialMaxPooling((2,2)))
 
-    model.add(df.SpatialConvolution(32, 64, 5, 5, 1, 1, with_bias=False))
+    model.add(df.SpatialConvolution(32, 64, (5,5), with_bias=False))
     model.add(df.BatchNormalization(64))
     model.add(df.ReLU())
-    model.add(df.SpatialMaxPooling(2, 2))
+    model.add(df.SpatialMaxPooling((2,2)))
     model.add(df.Reshape(-1, 4*4*64))
 
     model.add(df.Linear(4*4*64, 100, with_bias=False))

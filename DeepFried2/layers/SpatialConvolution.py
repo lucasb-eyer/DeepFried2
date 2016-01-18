@@ -3,15 +3,15 @@ from DeepFried2.utils import create_param_and_grad, expand
 import numpy as np
 
 class SpatialConvolution(df.Module):
-    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border_mode='valid', with_bias=True, initW=df.init.xavier(), initB=df.init.const(0), imshape=None):
+    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border='valid', with_bias=True, initW=df.init.xavier(), initB=df.init.const(0), imshape=None):
         df.Module.__init__(self)
         self.nchan_in = nchan_in
         self.nchan_out = nchan_out
         self.filter_size = filter_size
         self.with_bias = with_bias
-        self.imshape = expand(imshape, len(filter_size), expand_nonnum=True, name='imshape')
-        self.stride = expand(stride, len(filter_size), name='stride')
-        self.border_mode = expand(border_mode, len(filter_size), name='border_mode')
+        self.imshape = expand(imshape, len(filter_size), 'imshape', expand_nonnum=True)
+        self.stride = expand(stride, len(filter_size), 'stride')
+        self.border = expand(border, len(filter_size), 'border')
 
         if len(self.filter_size) == 3 and any(s != 1 for s in stride):
             raise NotImplementedError('stride != 1 is not implemented for 3D convolutions')
@@ -28,7 +28,7 @@ class SpatialConvolution(df.Module):
             self.bias, self.grad_bias = create_param_and_grad(nchan_out, initB, name='bconv_{}'.format(nchan_out))
 
     def symb_forward(self, symb_input):
-        mode = self.border_mode
+        mode = self.border
         input_shape = symb_input.shape
 
         # Implement 'same' convolution by padding upfront. (TODO: use theano's 'half'? Is it supported in 3d?)
@@ -36,18 +36,15 @@ class SpatialConvolution(df.Module):
             if any(d != 1 for d in self.stride):
                 raise NotImplementedError("'same' is not implement for strides != 1 (try CUDNN)")
             mode = 'valid'
-            padding = tuple( (k - 1)//2 for k in self.filter_size )
+            symb_input = df.utils.pad(symb_input, (0,0) + tuple( (k - 1)//2 for k in self.filter_size ))
         # 'full' is not implemented in 3D, so work-around by padding upfront.
         # 3D is forced to use 'valid', so we're not setting anything for that here.
         elif mode == 'full' and symb_input.ndim == 5:
-            padding = tuple( k - 1 for k in self.filter_size )
+            symb_input = df.utils.pad(symb_input, (0,0) + tuple( k - 1 for k in self.filter_size ))
         # If a specific padding is set, convolution is always "normal", i.e. 'valid'.
         elif isinstance(mode, tuple):
             mode = 'valid'
-            padding = self.border_mode
-
-        if any(p != 0 for p in padding):
-            symb_input = df.utils.pad(symb_input, (0,0) + padding)
+            symb_input = df.utils.pad(symb_input, (0,0) + self.border)
 
         if symb_input.ndim == 5:
             # shuffle bcd01 -> bdc01
