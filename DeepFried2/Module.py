@@ -50,12 +50,16 @@ class Module(object):
         if self.training_mode not in self._fn_forward:
             symb_in = make_tensor_or_tensors(data, 'X')
             symb_out = self.symb_forward(symb_in)
-            self._fn_forward[self.training_mode] = df.th.function(
+            extra_out = self.get_extra_outputs()
+            fn = self._fn_forward[self.training_mode] = df.th.function(
                 inputs=aslist(symb_in),
-                outputs=symb_out
+                outputs=aslist(symb_out) + extra_out
             )
+            fn._df2_extra = extra_out
 
-        return self._fn_forward[self.training_mode](*aslist(data))
+        fn = self._fn_forward[self.training_mode]
+        outs = fn(*aslist(data))
+        return self._collect_extra_outputs(fn, outs)
 
     def accumulate_gradients(self, data_in, data_tgt, loss):
         if self.training_mode not in self._fn_accum_grads:
@@ -63,19 +67,44 @@ class Module(object):
             symb_tgt = make_tensor_or_tensors(data_tgt, 'T')
             symb_out = self.symb_forward(symb_in)
             symb_err = loss.full_symb_forward(symb_out, symb_tgt)
+            extra_out = self.get_extra_outputs()
 
             params = self.parameters(trainable_only=True)
             symb_grads = df.th.grad(cost=symb_err, wrt=[p.param for p in params])
             grads_updates = [(p.grad, p.grad + symb_grad) for p, symb_grad in zip(params, symb_grads)]
 
-            self._fn_accum_grads[self.training_mode] = df.th.function(
+            fn = self._fn_accum_grads[self.training_mode] = df.th.function(
                 inputs=aslist(symb_in) + aslist(symb_tgt),
-                outputs=symb_err,
+                outputs=aslist(symb_err) + extra_out,
                 updates=grads_updates
             )
+            fn._df2_extra = extra_out
 
+        fn = self._fn_accum_grads[self.training_mode]
         args = aslist(data_in) + aslist(data_tgt)
-        return self._fn_accum_grads[self.training_mode](*args)
+        outs = fn(*args)
+        return self._collect_extra_outputs(fn, outs)
+
+    def get_extra_outputs(self):
+        """
+        Return a list of Theano expressions which will be passed as additional
+        `output` parameters. The computed value will be stored in the
+        expression's `val` attribute.
+
+        Guaranteed to be called after `symb_forward`.
+        """
+        return []
+
+    def _collect_extra_outputs(self, fn, vals):
+        # The number of non-extra outputs.
+        nout = len(vals) - len(fn._df2_extra)
+
+        # Store all outputs in the `val` attribute so that they can possibly
+        # be retrieved by the modules that asked for them.
+        for out, val in zip(fn._df2_extra, vals[nout:]):
+            out.val = val
+
+        return vals[:nout] if nout > 1 else vals[0]
 
     def get_stat_updates(self):
         """

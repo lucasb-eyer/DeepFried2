@@ -30,6 +30,9 @@ class Container(df.Module):
         # e.g. do weight sharing.
         return list(_OrderedDict.fromkeys(params).keys())
 
+    def get_extra_outputs(self):
+        return list(_chain.from_iterable(m.get_extra_outputs() for m in self.modules))
+
     def get_stat_updates(self):
         return list(_chain.from_iterable(m.get_stat_updates() for m in self.modules))
 
@@ -56,3 +59,13 @@ class Container(df.Module):
     def __setstate__(self, state):
         for m, s in zip(self.modules, state):
             m.__setstate__(s)
+
+
+class SingleModuleContainer(Container):
+    def __init__(self, module):
+        Container.__init__(self, module)
+
+    def add(self, mod):
+        if len(self.modules):
+            raise TypeError("Container `{}` can't hold more than one module.".format(df.utils.typename(self)))
+        Container.add(self, mod)
