@@ -11,8 +11,8 @@ def main(params):
 
     model = cnn(32,
         df.Parallel(
-            df.Sequential(df.Linear(1024, 20, initW=df.init.const(0)), df.SoftMax()),
-            df.Sequential(df.Linear(1024,100, initW=df.init.const(0)), df.SoftMax()),
+            df.Sequential(df.Linear(1024, 20, init=df.init.const(0)), df.SoftMax()),
+            df.Sequential(df.Linear(1024,100, init=df.init.const(0)), df.SoftMax()),
         )
     )
 

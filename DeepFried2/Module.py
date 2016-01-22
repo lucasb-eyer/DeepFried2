@@ -1,7 +1,6 @@
 import DeepFried2 as df
 from DeepFried2.utils import make_tensor_or_tensors, aslist
 
-from collections import OrderedDict as _OrderedDict
 import numpy as _np
 
 class Module:
@@ -19,44 +18,24 @@ class Module:
     #def __hash__(self):
     #    raise NotImplementedError("You *need* to reimplement hash, even if it's just python's default. See the documentation for more info.")
 
+    def _addparam(self, *a, **kw):
+        # Add it here because many don't even have params. This avoids misuse.
+        if not hasattr(self, '_params'):
+            self._params = []
+
+        param = df.Param(*a, **kw)
+        self._params.append(param)
+        return param
+
     def zero_grad_parameters(self):
-        _, grads = self.unique_parameters()  # Here, it's just a matter of performance. But even then, not really.
-        for grad in grads:
-            grad.set_value(_np.zeros_like(grad.get_value()))
+        for p in self.parameters(trainable_only=True):
+            p.zero_grad()
 
-    def parameters(self):
-        params, grads = [], []
-
-        if hasattr(self, 'weight'):
-            assert hasattr(self, 'grad_weight'), "The layer {} has a `weight` variable but no `grad_weight`, you probably forget to implement it.".format(df.utils.typename(self))
-            params += [self.weight]
-            grads += [self.grad_weight]
-
-        if hasattr(self, 'bias'):
-            assert hasattr(self, 'grad_bias'), "The layer {} has a `bias` variable but no `grad_bias`, you probably forget to implement it.".format(df.utils.typename(self))
-            params += [self.bias]
-            grads += [self.grad_bias]
-
-        return params, grads
-
-    def unique_parameters(self):
-        # We actually need to remove duplicates from the list of parameters
-        # (and their corresponding gradients) in order to support reusing
-        # the same layer at multiple places in the graph,
-        # e.g. do weight sharing.
-        params, grads = self.parameters()
-        return (
-            list(_OrderedDict.fromkeys(params).keys()),
-            list(_OrderedDict.fromkeys(grads).keys()),
-        )
-
-    def may_decay(self):
-        flags = []
-        if hasattr(self, 'weight'):
-            flags += [True]
-        if hasattr(self, 'bias'):
-            flags += [False]
-        return flags
+    def parameters(self, trainable_only=False):
+        params = getattr(self, '_params', [])
+        if trainable_only:
+            params = [p for p in params if p.trainable()]
+        return params
 
     def evaluate(self):
         self.training_mode = False
@@ -85,10 +64,10 @@ class Module:
             symb_out = self.symb_forward(symb_in)
             symb_err = loss.full_symb_forward(symb_out, symb_tgt)
 
-            params, grads = self.unique_parameters()
-            symb_grads = df.th.grad(cost=symb_err, wrt=params)
+            params = self.parameters(trainable_only=True)
+            symb_grads = df.th.grad(cost=symb_err, wrt=[p.param for p in params])
+            grads_updates = [(p.grad, p.grad + symb_grad) for p, symb_grad in zip(params, symb_grads)]
 
-            grads_updates = [(grad, grad + symb_grad) for grad, symb_grad in zip(grads, symb_grads)]
             self._fn_accum_grads[self.training_mode] = df.th.function(
                 inputs=aslist(symb_in) + aslist(symb_tgt),
                 outputs=symb_err,
@@ -151,8 +130,8 @@ class Module:
         self._fn_accum_stats.clear()
 
     def __getstate__(self):
-        return [p.get_value() for p in self.unique_parameters()[0]]
+        return [p.get_value() for p in self.parameters()]
 
     def __setstate__(self, state):
-        for p, s in zip(self.unique_parameters()[0], state):
+        for p, s in zip(self.parameters(), state):
             p.set_value(s)

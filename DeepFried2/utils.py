@@ -4,18 +4,6 @@ from warnings import warn as _warn
 from numbers import Number as _Number
 
 
-def create_param(shape, init, fan=None, name=None, type=df.floatX):
-    return df.th.shared(init(shape, fan).astype(type), name=name)
-
-
-def create_param_and_grad(shape, init, fan=None, name=None, type=df.floatX, **kw):
-    val = init(shape, fan).astype(type)
-    param = df.th.shared(val, name=name, **kw)
-    grad_name = 'grad_' + name if name is not None else None
-    grad_param = df.th.shared(_np.zeros_like(val), name=grad_name, **kw)
-    return param, grad_param
-
-
 def create_param_state_as(other, initial_value=0, prefix='state_for_'):
     return df.th.shared(other.get_value()*0 + initial_value,
         broadcastable=other.broadcastable,
@@ -46,21 +34,17 @@ def make_tensor_or_tensors(data_or_datas, name):
 
 
 def count_params(module):
-    params, _ = module.unique_parameters()
-    return sum(p.get_value().size for p in params)
+    return sum(p.get_value().size for p in module.parameters())
 
 
 def save_params(module, where, compress=False):
-    params, _ = module.unique_parameters()
-
     savefn = _np.savez_compressed if compress else _np.savez
-    savefn(where, params=[p.get_value() for p in params])
+    savefn(where, params=[p.get_value() for p in module.parameters()])
 
 
 def load_params(module, fromwhere):
-    params, _ = module.unique_parameters()
     with _np.load(fromwhere) as f:
-        for p, v in zip(params, f['params']):
+        for p, v in zip(module.parameters(), f['params']):
             p.set_value(v)
 
 
