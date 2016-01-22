@@ -99,6 +99,13 @@ class Module:
         return self._fn_accum_grads[self.training_mode](*args)
 
     def get_stat_updates(self):
+        """
+        Return extra `update` statements, currently only Batch-Normalization.
+        As soon as something else has a similar need, we might need to unify
+        them, and possibly change/generalize the training/evaluate modes.
+
+        Guaranteed to be called after `symb_forward`.
+        """
         return []
 
     def accumulate_statistics(self, data_in):
