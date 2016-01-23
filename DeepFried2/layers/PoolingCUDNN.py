@@ -11,13 +11,16 @@ class PoolingCUDNN(df.Module):
                     Defaults to `None`, which means `window_size`, i.e. non-overlapping.
         - `padding`: A tuple or number indicating the amount of 0-padding on either sides.
                      Defaults to `None` meaning no padding whatsoever.
-        - `mode`: `'max'`, `'average_inc_pad'` or `'average_exc_pad'`.
+        - `mode`: `'max'` (default), `'average_inc_pad'` or `'average_exc_pad'`.
+                  `'avg'` is a convenience shortcut for `'average_exc_pad'`.
 
         TODO: For now, you can do 1D pooling by using reshaping and setting
               width or height to 1, but we really should do that, or better yet
               PR to theano to allow 1D pooling (it seems cuDNN can).
         """
         df.Module.__init__(self)
+        if mode == 'avg':
+            mode = 'average_exc_pad'
         self.window_size = window_size
         self.mode = mode
 
