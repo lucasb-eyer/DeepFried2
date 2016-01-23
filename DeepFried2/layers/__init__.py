@@ -8,13 +8,13 @@ from .Log import Log
 from .ReLU import ReLU
 from .Reshape import Reshape
 from .Permute import Permute
+from .PoolingCUDNN import PoolingCUDNN
 from .Sigmoid import Sigmoid
 from .SoftMax import SoftMax
 from .SpatialConvolution import SpatialConvolution
 from .SpatialConvolutionCUDNN import SpatialConvolutionCUDNN
 from .BackwardsConvolutionCUDNN import BackwardsConvolutionCUDNN
 from .SpatialMaxPooling import SpatialMaxPooling
-from .SpatialMaxPoolingCUDNN import SpatialMaxPoolingCUDNN
 from .SpatialSoftMaxCUDNN import SpatialSoftMaxCUDNN
 from .UpSample import UpSample
 from .Tanh import Tanh
