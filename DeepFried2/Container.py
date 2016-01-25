@@ -22,7 +22,7 @@ class Container(df.Module):
             module.training()
 
     def parameters(self, *a, **kw):
-        params = _chain.from_iterable(m.parameters(*a, **kw) for m in self.modules)
+        params = list(_chain.from_iterable(m.parameters(*a, **kw) for m in self.modules))
 
         # We actually need to remove duplicates from the list of parameters
         # (and their corresponding gradients) in order to support reusing
@@ -31,7 +31,7 @@ class Container(df.Module):
         return list(_OrderedDict.fromkeys(params).keys())
 
     def get_stat_updates(self):
-        return _chain.from_iterable(m.get_stat_updates() for m in self.modules)
+        return list(_chain.from_iterable(m.get_stat_updates() for m in self.modules))
 
     def add(self, *modules):
         for m in modules:
