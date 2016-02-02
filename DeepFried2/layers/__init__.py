@@ -7,6 +7,7 @@ from .Bias import Bias
 from .Log import Log
 from .ReLU import ReLU
 from .Reshape import Reshape
+from .Flatten import Flatten
 from .Permute import Permute
 from .Sigmoid import Sigmoid
 from .SoftMax import SoftMax
