@@ -37,7 +37,9 @@ class SpatialConvolutionCUDNN(df.Module):
 
 
     def symb_forward(self, symb_input):
-        conv = dnn.dnn_conv3d if symb_input.ndim == 5 else dnn.dnn_conv
+        # Check for filter-size instead of input dims, as input dimension 5 could
+        # mean a time-series of images just as well as a 3D volume.
+        conv = dnn.dnn_conv3d if len(self.filter_size) == 3 else dnn.dnn_conv
 
         conv_output = conv(
             img=symb_input,
