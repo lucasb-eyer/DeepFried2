@@ -34,22 +34,22 @@ class SpatialConvolution(df.Module):
         mode = self.border
         input_shape = symb_input.shape
 
+        if len(self.filter_size) == 3:
         # Implement 'same' convolution by padding upfront. (TODO: use theano's 'half'? Is it supported in 3d?)
-        if mode == 'same':
-            if any(d != 1 for d in self.stride):
-                raise NotImplementedError("'same' is not implement for strides != 1 (try CUDNN)")
-            mode = 'valid'
-            symb_input = df.utils.pad(symb_input, (0,0) + tuple( (k - 1)//2 for k in self.filter_size ))
-        # 'full' is not implemented in 3D, so work-around by padding upfront.
-        # 3D is forced to use 'valid', so we're not setting anything for that here.
-        elif mode == 'full' and symb_input.ndim == 5:
-            symb_input = df.utils.pad(symb_input, (0,0) + tuple( k - 1 for k in self.filter_size ))
-        # If a specific padding is set, convolution is always "normal", i.e. 'valid'.
-        elif isinstance(mode, tuple):
-            mode = 'valid'
-            symb_input = df.utils.pad(symb_input, (0,0) + self.border)
+            if mode == 'same':
+                if any(d != 1 for d in self.stride):
+                    raise NotImplementedError("'same' is not implement for strides != 1 (try CUDNN)")
+                mode = 'valid'
+                symb_input = df.utils.pad(symb_input, (0,0) + tuple( (k - 1)//2 for k in self.filter_size ))
+            # 'full' is not implemented in 3D, so work-around by padding upfront.
+            # 3D is forced to use 'valid', so we're not setting anything for that here.
+            elif mode == 'full':
+                symb_input = df.utils.pad(symb_input, (0,0) + tuple( k - 1 for k in self.filter_size ))
+            # If a specific padding is set, convolution is always "normal", i.e. 'valid'.
+            elif isinstance(mode, tuple):
+                mode = 'valid'
+                symb_input = df.utils.pad(symb_input, (0,0) + self.border)
 
-        if symb_input.ndim == 5:
             # shuffle bcd01 -> bdc01
             conv_output = df.T.nnet.conv3d2d.conv3d(symb_input.swapaxes(1,2),
                     self.W.param.swapaxes(1,2),
@@ -58,7 +58,10 @@ class SpatialConvolution(df.Module):
             # shuffle bdc01 -> bcd01
             conv_output = conv_output.swapaxes(1,2)
         else:
-            conv_output = df.T.nnet.conv.conv2d(symb_input, self.W.param,
+            if mode == 'same':
+                mode = 'half'
+
+            conv_output = df.T.nnet.conv2d(symb_input, self.W.param,
                 image_shape=(None, self.nchan_in) + self.imshape,
                 filter_shape=self.w_shape,
                 border_mode=mode,
