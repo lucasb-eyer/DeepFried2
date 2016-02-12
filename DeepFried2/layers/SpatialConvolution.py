@@ -62,7 +62,7 @@ class SpatialConvolution(df.Module):
                 mode = 'half'
 
             conv_output = df.T.nnet.conv2d(symb_input, self.W.param,
-                image_shape=(None, self.nchan_in) + self.imshape,
+                input_shape=(None, self.nchan_in) + self.imshape,
                 filter_shape=self.w_shape,
                 border_mode=mode,
                 subsample=self.stride
