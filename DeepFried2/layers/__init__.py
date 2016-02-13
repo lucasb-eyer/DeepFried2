@@ -6,6 +6,7 @@ from .Linear import Linear
 from .Bias import Bias
 from .Log import Log
 from .ReLU import ReLU
+from .ELU import ELU
 from .Reshape import Reshape
 from .Flatten import Flatten
 from .Permute import Permute
