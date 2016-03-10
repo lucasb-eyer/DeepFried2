@@ -4,11 +4,13 @@ import numpy as np
 from theano.tensor.nnet import conv3d2d
 
 class SpatialConvolution(df.Module):
-    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border='valid', init=df.init.xavier(), bias=df.init.const(0), imshape=None):
+    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border='valid', mode='cross', init=df.init.xavier(), bias=df.init.const(0), imshape=None):
+        # See `SpatialConvolutionCUDNN` comment for the `mode` parameter. Only works in 2D
         df.Module.__init__(self)
         self.nchan_in = nchan_in
         self.nchan_out = nchan_out
         self.filter_size = filter_size
+        self.mode = mode
         self.imshape = expand(imshape, len(filter_size), 'imshape', expand_nonnum=True)
         self.stride = expand(stride, len(filter_size), 'stride')
         self.border = expand(border, len(filter_size), 'border')
@@ -18,6 +20,12 @@ class SpatialConvolution(df.Module):
 
         if len(self.filter_size) == 3 and imshape is not None:
             raise NotImplementedError('imshape is not implemented for 3D convolutions')
+
+        if len(self.filter_size) == 3 and mode != 'conv':
+            raise NotImplementedError('mode="cross" is not implemented for 3D convolutions')
+
+        if mode not in ('conv', 'cross'):
+            raise NotImplementedError('Only "conv" and "cross" modes are implemented')
 
         self.w_shape = (nchan_out, nchan_in) + self.filter_size
         w_fan = (nchan_in*np.prod(self.filter_size), nchan_out*np.prod(self.filter_size))
@@ -65,7 +73,8 @@ class SpatialConvolution(df.Module):
                 input_shape=(None, self.nchan_in) + self.imshape,
                 filter_shape=self.w_shape,
                 border_mode=mode,
-                subsample=self.stride
+                subsample=self.stride,
+                filter_flip={'conv': True, 'cross': False}[self.mode],
             )
 
         if self.b is not None:
