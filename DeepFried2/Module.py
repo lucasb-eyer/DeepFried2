@@ -1,5 +1,5 @@
 import DeepFried2 as df
-from DeepFried2.utils import make_tensor_or_tensors, flatten
+from DeepFried2.utils import tensors_for_ndarrays, flatten
 
 import numpy as _np
 
@@ -48,7 +48,7 @@ class Module(object):
 
     def forward(self, data):
         if self.training_mode not in self._fn_forward:
-            symb_in = make_tensor_or_tensors(data, 'X')
+            symb_in = tensors_for_ndarrays(data, 'X')
             symb_out = self.symb_forward(symb_in)
             extra_out = self.get_extra_outputs()
             fn = self._fn_forward[self.training_mode] = df.th.function(
@@ -63,8 +63,8 @@ class Module(object):
 
     def accumulate_gradients(self, data_in, data_tgt, loss):
         if self.training_mode not in self._fn_accum_grads:
-            symb_in = make_tensor_or_tensors(data_in, 'X')
-            symb_tgt = make_tensor_or_tensors(data_tgt, 'T')
+            symb_in = tensors_for_ndarrays(data_in, 'X')
+            symb_tgt = tensors_for_ndarrays(data_tgt, 'T')
             symb_out = self.symb_forward(symb_in)
             symb_err = loss.full_symb_forward(symb_out, symb_tgt)
             extra_out = self.get_extra_outputs()
@@ -118,7 +118,7 @@ class Module(object):
 
     def accumulate_statistics(self, data_in):
         if self.training_mode not in self._fn_accum_stats:
-            symb_in = make_tensor_or_tensors(data_in, 'X')
+            symb_in = tensors_for_ndarrays(data_in, 'X')
 
             # Call forward once so it can compute some variables it'll actually
             # use in the stat updates collection.

@@ -26,11 +26,15 @@ def make_tensor(dtype, ndim, name):
     return df.th.tensor.TensorType(dtype, (False,) * ndim)(name)
 
 
-def make_tensor_or_tensors(data_or_datas, name):
-    if isinstance(data_or_datas, (list, tuple)):
-        return [make_tensor(data.dtype, data.ndim, name + str(i+1)) for i, data in enumerate(data_or_datas)]
-    else:
-        return make_tensor(data_or_datas.dtype, data_or_datas.ndim, name)
+def tensors_for_ndarrays(datas, basename):
+    if isinstance(datas, _np.ndarray):
+        return make_tensor(datas.dtype, datas.ndim, basename)
+
+    if isinstance(datas, (list, tuple)):
+        return [tensors_for_ndarrays(data, "{}_{}".format(basename, i)) for i, data in enumerate(datas)]
+    # Could potentially make it "any iterable" by removing above check.
+    # But would need to guarantee we never iterate over it twice, which is harder!
+    raise TypeError("I only understand lists or tuples of numpy arrays! (possibly nested)")
 
 
 def count_params(module, trainable_only=True):

@@ -1,5 +1,5 @@
 import DeepFried2 as df
-from DeepFried2.utils import make_tensor_or_tensors, flatten
+from DeepFried2.utils import tensors_for_ndarrays, flatten
 
 
 class Criterion(object):
@@ -36,8 +36,8 @@ class Criterion(object):
         # is actually somewhat slower (e.g. for RMSE: 1.2ms vs. 0.2ms). So
         # ideally, we'd like to compile a CPU-version here, but I don't know how!
         if with_penalties not in self._fn_forward:
-            symb_in = make_tensor_or_tensors(num_input, 'Y')
-            symb_tgt = make_tensor_or_tensors(num_target, 'T')
+            symb_in = tensors_for_ndarrays(num_input, 'Y')
+            symb_tgt = tensors_for_ndarrays(num_target, 'T')
             if with_penalties:
                 symb_out = self.full_symb_forward(symb_in, symb_tgt)
             else:
