@@ -67,7 +67,8 @@ class ClassNLLCriterion(df.Criterion):
 
             if self.clip is not None:
                 p_y = df.T.clip(p_y, self.clip, 1-self.clip)
-            return df.T.mean(-df.T.log(p_y))
+
+            return -df.T.log(p_y)
 
         elif symb_targets.ndim == D:
             # This is the case when both are full distributions.
@@ -75,7 +76,7 @@ class ClassNLLCriterion(df.Criterion):
             p_y = symb_input
             if self.clip is not None:
                 p_y = df.T.clip(p_y, self.clip, 1-self.clip)
-            return df.T.mean(-df.T.sum(symb_targets * df.T.log(p_y), axis=self.axis))
+            return -df.T.sum(symb_targets * df.T.log(p_y), axis=self.axis)
 
         else:
             assert False, "Mismatch in dimensionalities of `{}` input ({}) and targets ({}).".format(df.utils.typename(self), symb_input.ndim, symb_targets.ndim)
