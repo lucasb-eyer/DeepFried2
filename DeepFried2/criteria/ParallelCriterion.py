@@ -18,7 +18,7 @@ class ParallelCriterion(df.Criterion):
         self.criteria = []
 
         for wc in weighted_criteria:
-            self.add(*df.utils.aslist(wc))
+            self.add(*df.utils.flatten(wc))
 
     def add(self, weight_or_crit, crit=None):
         if crit is None:
@@ -27,11 +27,11 @@ class ParallelCriterion(df.Criterion):
             self.criteria.append((weight_or_crit, crit))
 
     def symb_forward(self, symb_inputs, symb_targets):
-        symb_inputs = df.utils.aslist(symb_inputs)
-        symb_targets = df.utils.aslist(symb_targets)
+        symb_inputs = df.utils.flatten(symb_inputs)
+        symb_targets = df.utils.flatten(symb_targets)
 
         if self.repeat_target:
-            symb_targets = [symb_targets] * len(symb_inputs)
+            symb_targets = symb_targets * len(symb_inputs)
 
         assert len(symb_inputs) == len(symb_targets) == len(self.criteria), "`{}` mismatch in number of inputs ({}), criteria ({}) and targets ({})" .format(df.utils.typename(self), len(symb_inputs), len(self.criteria), len(symb_targets))
 

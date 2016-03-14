@@ -1,5 +1,5 @@
 import DeepFried2 as df
-from DeepFried2.utils import make_tensor_or_tensors, aslist
+from DeepFried2.utils import make_tensor_or_tensors, flatten
 
 
 class Criterion(object):
@@ -43,8 +43,8 @@ class Criterion(object):
             else:
                 symb_out = self.symb_forward(symb_in, symb_tgt)
             self._fn_forward[with_penalties] = df.th.function(
-                inputs=aslist(symb_in) + aslist(symb_tgt),
+                inputs=flatten(symb_in) + flatten(symb_tgt),
                 outputs=symb_out
             )
 
-        return self._fn_forward[with_penalties](*(aslist(num_input)+aslist(num_target)))
+        return self._fn_forward[with_penalties](*(flatten(num_input) + flatten(num_target)))

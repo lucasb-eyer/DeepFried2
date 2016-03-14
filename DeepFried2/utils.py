@@ -37,15 +37,20 @@ def count_params(module, trainable_only=True):
     return sum(p.get_value().size for p in module.parameters(trainable_only=trainable_only))
 
 
-def aslist(what, none_to_empty=False):
-    if isinstance(what, list):
-        return what
-    elif isinstance(what, tuple):
-        return list(what)
-    elif none_to_empty and what is None:
+def flatten(what, types=(list, tuple), none_to_empty=False):
+    if what is None and none_to_empty:
         return []
-    else:
+
+    if not isinstance(what, types):
         return [what]
+
+    # NOTE: I actually timed that this is faster than the comprehension,
+    #       even though it probably doesn't matter :)
+    # 350us vs 250us
+    ret = []
+    for sub in what:
+        ret += flatten(sub, types=types, none_to_empty=none_to_empty)
+    return ret
 
 
 def expand(tup, ndim, name=None, expand_nonnum=False):

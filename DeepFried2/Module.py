@@ -1,5 +1,5 @@
 import DeepFried2 as df
-from DeepFried2.utils import make_tensor_or_tensors, aslist
+from DeepFried2.utils import make_tensor_or_tensors, flatten
 
 import numpy as _np
 
@@ -52,13 +52,13 @@ class Module(object):
             symb_out = self.symb_forward(symb_in)
             extra_out = self.get_extra_outputs()
             fn = self._fn_forward[self.training_mode] = df.th.function(
-                inputs=aslist(symb_in),
-                outputs=aslist(symb_out) + extra_out
+                inputs=flatten(symb_in),
+                outputs=flatten(symb_out) + flatten(extra_out)
             )
             fn._df2_extra = extra_out
 
         fn = self._fn_forward[self.training_mode]
-        outs = fn(*aslist(data))
+        outs = fn(*flatten(data))
         return self._collect_extra_outputs(fn, outs)
 
     def accumulate_gradients(self, data_in, data_tgt, loss):
@@ -74,14 +74,14 @@ class Module(object):
             grads_updates = [(p.grad, p.grad + symb_grad) for p, symb_grad in zip(params, symb_grads)]
 
             fn = self._fn_accum_grads[self.training_mode] = df.th.function(
-                inputs=aslist(symb_in) + aslist(symb_tgt),
-                outputs=aslist(symb_err) + extra_out,
+                inputs=flatten(symb_in) + flatten(symb_tgt),
+                outputs=flatten(symb_err) + flatten(extra_out),
                 updates=grads_updates
             )
             fn._df2_extra = extra_out
 
         fn = self._fn_accum_grads[self.training_mode]
-        args = aslist(data_in) + aslist(data_tgt)
+        args = flatten(data_in) + flatten(data_tgt)
         outs = fn(*args)
         return self._collect_extra_outputs(fn, outs)
 
@@ -147,11 +147,11 @@ class Module(object):
                 stat_updates = uniq_updates
 
             self._fn_accum_stats[self.training_mode] = df.th.function(
-                inputs=aslist(symb_in),
+                inputs=flatten(symb_in),
                 updates=stat_updates
             )
 
-        self._fn_accum_stats[self.training_mode](*aslist(data_in))
+        self._fn_accum_stats[self.training_mode](*flatten(data_in))
 
     def clear(self):
         self._fn_forward.clear()

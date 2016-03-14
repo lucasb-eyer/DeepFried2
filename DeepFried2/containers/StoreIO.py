@@ -21,8 +21,8 @@ class StoreIO(df.SingleModuleContainer):
         return symb_out
 
     def get_extra_outputs(self):
-        return (df.utils.aslist(self._inp[self.training_mode], none_to_empty=True)
-               +df.utils.aslist(self._out[self.training_mode], none_to_empty=True))
+        return (df.utils.flatten(self._inp[self.training_mode], none_to_empty=True)
+               +df.utils.flatten(self._out[self.training_mode], none_to_empty=True))
 
     @property
     def out(self):
