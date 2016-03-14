@@ -33,8 +33,8 @@ def make_tensor_or_tensors(data_or_datas, name):
         return make_tensor(data_or_datas.dtype, data_or_datas.ndim, name)
 
 
-def count_params(module):
-    return sum(p.get_value().size for p in module.parameters())
+def count_params(module, trainable_only=True):
+    return sum(p.get_value().size for p in module.parameters(trainable_only=trainable_only))
 
 
 def aslist(what):
