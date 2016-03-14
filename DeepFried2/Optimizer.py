@@ -1,7 +1,7 @@
 import DeepFried2 as df
 
 
-class Optimizer:
+class Optimizer(object):
 
     def __init__(self, **hyperparams):
         self.states = {}

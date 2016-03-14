@@ -2,7 +2,7 @@ import DeepFried2 as df
 from DeepFried2.utils import make_tensor_or_tensors, aslist
 
 
-class Criterion:
+class Criterion(object):
 
     def __init__(self):
         self.penalties = []
