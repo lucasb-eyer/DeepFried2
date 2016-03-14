@@ -2,7 +2,7 @@ import DeepFried2 as df
 import numpy as _np
 
 
-class Param:
+class Param(object):
 
     def __init__(self, shape, init, fan=None, name=None, learn=True, decay=True, dtype=df.floatX, **kw):
         self.init = init

@@ -3,7 +3,7 @@ from DeepFried2.utils import make_tensor_or_tensors, aslist
 
 import numpy as _np
 
-class Module:
+class Module(object):
 
     def __init__(self):
         self.training_mode = True
