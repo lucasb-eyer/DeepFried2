@@ -46,6 +46,10 @@ class Container(df.Module):
         else:
             return self.modules[key]
 
+    def __len__(self):
+        # This one is needed to make __getindex__ work with negative indices.
+        return len(self.modules)
+
     def __getstate__(self):
         return [m.__getstate__() for m in self.modules]
 
