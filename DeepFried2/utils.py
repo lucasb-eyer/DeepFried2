@@ -37,11 +37,13 @@ def count_params(module, trainable_only=True):
     return sum(p.get_value().size for p in module.parameters(trainable_only=trainable_only))
 
 
-def aslist(what):
+def aslist(what, none_to_empty=False):
     if isinstance(what, list):
         return what
     elif isinstance(what, tuple):
         return list(what)
+    elif none_to_empty and what is None:
+        return []
     else:
         return [what]
 
