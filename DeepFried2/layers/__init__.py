@@ -12,6 +12,7 @@ from .ELU import ELU
 from .Reshape import Reshape
 from .Flatten import Flatten
 from .Normalization import Normalization
+from .GridGenerators import AttentionGrid, AffineGrid, ProjectiveGrid
 from .Permute import Permute
 from .PoolingCUDNN import PoolingCUDNN
 from .Sigmoid import Sigmoid
@@ -21,5 +22,6 @@ from .SpatialConvolutionCUDNN import SpatialConvolutionCUDNN
 from .BackwardsConvolutionCUDNN import BackwardsConvolutionCUDNN
 from .SpatialMaxPooling import SpatialMaxPooling
 from .SpatialSoftMaxCUDNN import SpatialSoftMaxCUDNN
+from .SpatialTransformer import SpatialTransformer
 from .UpSample import UpSample
 from .Tanh import Tanh
