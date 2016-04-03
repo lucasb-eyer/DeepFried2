@@ -7,6 +7,7 @@ class Criterion(object):
     def __init__(self):
         self.penalties = []
         self.with_weights = False
+        self._ret_per_sample = False
         self._fn_forward = {}
 
     def _assert_same_dim(self, symb_input, symb_target):
@@ -24,7 +25,7 @@ class Criterion(object):
             weight, pen = weight_or_pen, pen
         self.penalties.append((weight, pen))
 
-    def full_symb_forward(self, symb_input, symb_target, with_penalties=True):
+    def __call__(self, symb_input, symb_target, with_penalties=True):
         # Possibly extract the weights as 2nd target.
         if self.with_weights is True:
             symb_target, symb_weights = symb_target
@@ -34,18 +35,14 @@ class Criterion(object):
         else:
             symb_weights = None
 
-        # TODO: Actually, don't
         cost = self.symb_forward(symb_input, symb_target)
-
-        # TODO: Here, we can keep/store/output unweighted per-sample costs!
+        self._per_sample_cost = cost
 
         if symb_weights is not None:
             cost = symb_weights * cost
 
-        # TODO: Here, we can keep/store/output weighted per-sample costs!
-
         # Criteria may return per-sample cost which we will average
-        # (optionally weighted) across samples.
+        # (optionally weighted) across samples, if necessary.
         if cost.ndim != 0:
             cost = df.T.mean(cost)
             if symb_weights is not None:
@@ -54,7 +51,7 @@ class Criterion(object):
 
         if with_penalties:
             for w, p in self.penalties:
-                cost += w*p.symb_forward()
+                cost = cost + w*p.symb_forward()
 
         return cost
 
@@ -66,17 +63,33 @@ class Criterion(object):
         self.with_weights = val
         return self
 
-    def forward(self, num_input, num_target, with_penalties=True):
+    def enable_per_sample_cost(self):
+        self._ret_per_sample = True
+        return self
+
+    def forward(self, num_input, num_target, with_penalties=True, per_sample=False):
         # NOTE: using the GPU for such trivial computations as most costs
         # is actually somewhat slower (e.g. for RMSE: GPU 1.2ms vs. CPU 0.2ms).
         # So ideally, we'd like to compile a CPU-version here, but I don't know how!
-        if with_penalties not in self._fn_forward:
+        if (with_penalties, per_sample) not in self._fn_forward:
             symb_in = tensors_for_ndarrays(num_input, 'Y')
             symb_tgt = tensors_for_ndarrays(num_target, 'T')
-            symb_out = self.full_symb_forward(symb_in, symb_tgt, with_penalties)
-            self._fn_forward[with_penalties] = df.th.function(
+            symb_out = self(symb_in, symb_tgt, with_penalties)
+            self._fn_forward[with_penalties, per_sample] = df.th.function(
                 inputs=flatten(symb_in) + flatten(symb_tgt),
-                outputs=symb_out
+                outputs=symb_out if not per_sample else self._per_sample_cost
             )
 
-        return self._fn_forward[with_penalties](*(flatten(num_input) + flatten(num_target)))
+        return self._fn_forward[with_penalties, per_sample](*(flatten(num_input) + flatten(num_target)))
+
+
+    # Get the per-sample cost in a similar way to the `StoreIO` container.
+
+    def get_extra_outputs(self):
+        return [self._per_sample_cost] if self._ret_per_sample else []
+
+    def last_per_sample_cost(self):
+        if not self._ret_per_sample:
+            raise ValueError("Call `enable_per_sample_cost()` first!")
+
+        return self._per_sample_cost.val

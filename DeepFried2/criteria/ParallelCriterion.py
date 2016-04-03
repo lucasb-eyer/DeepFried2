@@ -1,4 +1,5 @@
 import DeepFried2 as df
+from itertools import chain as _chain
 
 
 class ParallelCriterion(df.Criterion):
@@ -35,4 +36,7 @@ class ParallelCriterion(df.Criterion):
 
         assert len(symb_inputs) == len(symb_targets) == len(self.criteria), "`{}` mismatch in number of inputs ({}), criteria ({}) and targets ({})" .format(df.utils.typename(self), len(symb_inputs), len(self.criteria), len(symb_targets))
 
-        return sum(w*c.full_symb_forward(i, t) for (w,c), i, t in zip(self.criteria, symb_inputs, symb_targets))
+        return sum(w*c(i, t) for (w,c), i, t in zip(self.criteria, symb_inputs, symb_targets))
+
+    def get_extra_outputs(self):
+        return list(_chain.from_iterable(c.get_extra_outputs() for (w,c) in self.criteria))

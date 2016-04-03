@@ -61,21 +61,21 @@ class Module(object):
         outs = fn(*flatten(data))
         return self._collect_extra_outputs(fn, outs)
 
-    def accumulate_gradients(self, data_in, data_tgt, loss):
+    def accumulate_gradients(self, data_in, data_tgt, crit):
         if self.training_mode not in self._fn_accum_grads:
             symb_in = tensors_for_ndarrays(data_in, 'X')
             symb_tgt = tensors_for_ndarrays(data_tgt, 'T')
             symb_out = self.symb_forward(symb_in)
-            symb_err = loss.full_symb_forward(symb_out, symb_tgt)
-            extra_out = self.get_extra_outputs()
+            symb_cost = crit(symb_out, symb_tgt)
+            extra_out = self.get_extra_outputs() + crit.get_extra_outputs()
 
             params = self.parameters(trainable_only=True)
-            symb_grads = df.th.grad(cost=symb_err, wrt=[p.param for p in params])
+            symb_grads = df.th.grad(cost=symb_cost, wrt=[p.param for p in params])
             grads_updates = [(p.grad, p.grad + symb_grad) for p, symb_grad in zip(params, symb_grads)]
 
             fn = self._fn_accum_grads[self.training_mode] = df.th.function(
                 inputs=flatten(symb_in) + flatten(symb_tgt),
-                outputs=flatten(symb_err) + flatten(extra_out),
+                outputs=flatten(symb_cost) + flatten(extra_out),
                 updates=grads_updates
             )
             fn._df2_extra = extra_out
