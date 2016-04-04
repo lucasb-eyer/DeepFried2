@@ -53,7 +53,7 @@ class BatchNormalization(df.Module):
         # For example, for the usual case of images where dimensions are
         # (B,C,H,W), axis == [0, 2, 3] and d_shuffle == ['x', 0, 'x', 'x']
 
-        if self.training_mode:
+        if self._mode == 'train':
             self.batch_mean = df.T.mean(symb_input, axis=axis)
             self.batch_var = df.T.var(symb_input, axis=axis)
 
