@@ -43,7 +43,7 @@ class Container(df.Module):
 
     def __getitem__(self, key):
         if isinstance(key, slice):
-            return type(self)(*df.utils.aslist(self.modules[key]))
+            return type(self)(*self.modules[key])
         elif isinstance(key, (list, tuple)):
             return type(self)(*[self.modules[k] for k in key])
         else:
