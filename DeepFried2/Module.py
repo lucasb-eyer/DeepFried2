@@ -14,6 +14,11 @@ class Module(object):
         self._fn_accum_grads = {}
         self._fn_accum_stats = {}
 
+        # These will store the last gotten/produced symbolic input/output
+        # expressions, respectively. The key is the current mode.
+        self._last_symb_inp = {}
+        self._last_symb_out = {}
+
     #def __hash__(self):
     #    raise NotImplementedError("You *need* to reimplement hash, even if it's just python's default. See the documentation for more info.")
 
@@ -45,10 +50,16 @@ class Module(object):
     def symb_forward(self, symb_input):
         raise NotImplementedError("`{}` needs to implement `symb_forward` method.".format(df.utils.typename(self)))
 
+    def __call__(self, symb_input):
+        # Keep track of the symbolic inputs/outputs for things such as `Backward` layer.
+        self._last_symb_inp[self._mode] = symb_input
+        self._last_symb_out[self._mode] = self.symb_forward(symb_input)
+        return self._last_symb_out[self._mode]
+
     def forward(self, data):
         if self._mode not in self._fn_forward:
             symb_in = tensors_for_ndarrays(data, 'X')
-            symb_out = self.symb_forward(symb_in)
+            symb_out = self(symb_in)
             extra_out = self.get_extra_outputs()
             fn = self._fn_forward[self._mode] = df.th.function(
                 inputs=flatten(symb_in),
@@ -64,7 +75,7 @@ class Module(object):
         if self._mode not in self._fn_accum_grads:
             symb_in = tensors_for_ndarrays(data_in, 'X')
             symb_tgt = tensors_for_ndarrays(data_tgt, 'T')
-            symb_out = self.symb_forward(symb_in)
+            symb_out = self(symb_in)
             symb_cost = crit(symb_out, symb_tgt)
             extra_out = self.get_extra_outputs() + crit.get_extra_outputs()
 
@@ -121,7 +132,7 @@ class Module(object):
 
             # Call forward once so it can compute some variables it'll actually
             # use in the stat updates collection.
-            self.symb_forward(symb_in)
+            self(symb_in)
 
             stat_updates = self.get_stat_updates()
             if not stat_updates:

@@ -15,7 +15,7 @@ class ActiveIn(df.SingleModuleContainer):
 
     def symb_forward(self, symb_input):
         if self._mode == self.active_mode:
-            return self.modules[0].symb_forward(symb_input)
+            return self.modules[0](symb_input)
         else:
             return symb_input
 
@@ -34,7 +34,7 @@ class InactiveIn(df.SingleModuleContainer):
 
     def symb_forward(self, symb_input):
         if self._mode != self.inactive_mode:
-            return self.modules[0].symb_forward(symb_input)
+            return self.modules[0](symb_input)
         else:
             return symb_input
 
