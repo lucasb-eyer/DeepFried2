@@ -32,19 +32,7 @@ class RollOpBase(PyCudaOp):
             int width = x % width_size;
             int height_out = height / 2;
             int width_out = width / 2;
-            int batch_out = batch * 4;
-            if (height % 2 == 0 && width % 2 == 1)
-            {
-                batch_out += 1;
-            }
-            else if (height % 2 == 1 && width % 2 == 0)
-            {
-                batch_out += 2;
-            }
-            else if (height % 2 == 1 && width % 2 == 1)
-            {
-                batch_out += 3;
-            }
+            int batch_out = batch * 4 + 2*(height % 2) + (width % 2);
             if (batch < batch_size && feature < feature_size && height_out * 2 < height_size && width_out * 2 < width_size)
             {
                 output[batch_out * feature_size * ((height_size+1)/2) * ((width_size+1)/2) +
@@ -124,22 +112,9 @@ class UnRollOpBase(PyCudaOp):
             int feature = x / map_size;
             int height = (x % map_size) / width_size;
             int width = x % width_size;
-            int height_out = height * 2;
-            int width_out = width * 2;
+            int height_out = height * 2 + ((batch/2) % 2);
+            int width_out  =  width * 2 + ( batch    % 2);
             int batch_out = batch / 4;
-            if (batch % 4 == 1)
-            {
-                width_out += 1;
-            }
-            else if (batch % 4 == 2)
-            {
-                height_out += 1;
-            }
-            else if (batch % 4 == 3)
-            {
-                height_out += 1;
-                width_out += 1;
-            }
             if (batch < batch_size && feature < feature_size)
             {
                 output[batch_out * feature_size * height_size*2 * width_size*2 +
