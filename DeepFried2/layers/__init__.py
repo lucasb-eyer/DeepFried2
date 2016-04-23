@@ -20,6 +20,7 @@ from .SpatialConvolution import SpatialConvolution
 from .SpatialConvolutionCUDNN import SpatialConvolutionCUDNN
 from .BackwardsConvolutionCUDNN import BackwardsConvolutionCUDNN
 from .SpatialMaxPooling import SpatialMaxPooling
+from .SpatialOverfeatRoll import SpatialOverfeatRoll, SpatialOverfeatUnroll
 from .SpatialSoftMaxCUDNN import SpatialSoftMaxCUDNN
 from .UpSample import UpSample
 from .Tanh import Tanh
