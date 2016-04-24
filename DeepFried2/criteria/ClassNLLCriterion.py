@@ -11,9 +11,6 @@ class ClassNLLCriterion(df.Criterion):
     Contrary to Torch7, this criterion takes raw probabilities as input and
     relies on Theano's graph-optimizations to generate numerically stable code.
 
-    This might need to change to require log-probabilities when making use of
-    cuDNN's softmax in the near future.
-
     ClassNLLCriterion has two modus operandi, which might be split into two
     criteria in the future:
 
@@ -25,7 +22,7 @@ class ClassNLLCriterion(df.Criterion):
 
     This condition might also take the target dtype into account in the future.
     """
-    def __init__(self, clip=None, classprob_axis=1):
+    def __init__(self, clip=None, classprob_axis=1, log=True):
         """
         - `clip`: if not `None`, clips the incoming probabilites into the range
             [`clip`, 1-`clip`] in order to avoid numerical instabilities of the
@@ -33,10 +30,15 @@ class ClassNLLCriterion(df.Criterion):
 
         - `classprob_axis`: The axis along which the class-probabilities reside,
             i.e. this axis should have the same length as number of classes.
+
+        - `log` indicates whether to take the log or not. It can be useful to
+          set this to `False` if the output of the network is a log-probability
+          for stability reasons.
         """
         df.Criterion.__init__(self)
         self.clip = clip
         self.axis = classprob_axis
+        self.log = log
 
     def symb_forward(self, symb_input, symb_targets):
         D = symb_input.ndim
@@ -68,7 +70,7 @@ class ClassNLLCriterion(df.Criterion):
             if self.clip is not None:
                 p_y = df.T.clip(p_y, self.clip, 1-self.clip)
 
-            return -df.T.log(p_y)
+            return -df.T.log(p_y) if self.log else -p_y
 
         elif symb_targets.ndim == D:
             # This is the case when both are full distributions.
@@ -76,7 +78,8 @@ class ClassNLLCriterion(df.Criterion):
             p_y = symb_input
             if self.clip is not None:
                 p_y = df.T.clip(p_y, self.clip, 1-self.clip)
-            return -df.T.sum(symb_targets * df.T.log(p_y), axis=self.axis)
+            log_p_y = df.T.log(p_y) if self.log else p_y
+            return -df.T.sum(symb_targets * log_p_y, axis=self.axis)
 
         else:
             assert False, "Mismatch in dimensionalities of `{}` input ({}) and targets ({}).".format(df.utils.typename(self), symb_input.ndim, symb_targets.ndim)
