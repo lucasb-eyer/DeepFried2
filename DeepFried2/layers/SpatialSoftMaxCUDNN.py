@@ -19,8 +19,15 @@ def spatial_softmax(img, algo, mode):
 
 class SpatialSoftMaxCUDNN(df.Module):
     def __init__(self, algo='accurate', mode='channel'):
-        # algo: 'fast' is straightforward softmax, 'accurate' is shifting inputs to avoid overflow.
-        # mode: 'instance' is a softmax per image (across C,W,H), 'channel' is a softmax per pixel per image (across C).
+        """
+        - `algo`: One of the following values:
+            - `'fast'`: Straightforward softmax, beware numerical problems.
+            - `'accurate'`: Use the "subtract max input" stabilization to avoid overflows.
+            - `'log'`: Compute the log-softmax instead.
+        - `mode`: One of the following values:
+            - `'instance'`: Computes a single whole softmax per image (across C,H,W; output is B).
+            - `'channel'`: Computs a softmax per-pixel per-image (across C; output is B,H,W).
+        """
         df.Module.__init__(self)
         self.algo = algo
         self.mode = mode
