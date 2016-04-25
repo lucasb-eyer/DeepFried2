@@ -1,5 +1,6 @@
 from .Sequential import Sequential
 from .Parallel import Parallel
 from .Concat import Concat
-from .StoreIO import StoreIO
-from .TrainTestOnly import TrainOnly, TestOnly
+from .StoreOut import StoreOut
+from .ActiveIn import ActiveIn, InactiveIn, TrainingOnly, TestingOnly
+from .Backward import Backward

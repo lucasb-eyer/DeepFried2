@@ -69,3 +69,6 @@ class SingleModuleContainer(Container):
         if len(self.modules):
             raise TypeError("Container `{}` can't hold more than one module.".format(df.utils.typename(self)))
         Container.add(self, mod)
+
+    def symb_forward(self, symb_input):
+        return self.modules[0](symb_input)

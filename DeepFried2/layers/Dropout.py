@@ -10,7 +10,7 @@ class Dropout(df.Module):
         self.dropout = dropout
 
     def symb_forward(self, symb_input):
-        if self.training_mode:
+        if self._mode == 'train':
             mask = _srng.binomial(symb_input.shape,
                                   p=(1. - self.dropout),
                                   dtype=df.floatX
