@@ -1,9 +1,6 @@
 import DeepFried2 as df
 
 
-from theano.sandbox.cuda.basic_ops import gpu_contiguous
-
-
 class PyCudaOp(df.th.sandbox.cuda.GpuOp):
     def __eq__(self, other):
         return type(self) == type(other)
@@ -16,8 +13,10 @@ class PyCudaOp(df.th.sandbox.cuda.GpuOp):
 
     def make_node(self, inp, dy, dx):
         inp = df.th.sandbox.cuda.as_cuda_ndarray_variable(inp)
-        dy = df.th.gof.Constant(df.th.scalar.int32, dy)
-        dx = df.th.gof.Constant(df.th.scalar.int32, dx)
+        if isinstance(dy, int):
+            dy = df.th.gof.Constant(df.th.scalar.int32, dy)
+        if isinstance(dx, int):
+            dx = df.th.gof.Constant(df.th.scalar.int32, dx)
         return df.th.Apply(self, [inp, dy, dx], [inp.type()])
 
 
@@ -195,16 +194,25 @@ class UnRollOpGrad(RollOpBase):
 
 class RollOp(RollOpBase):
     def grad(self, inp, grads):
+        _, dy, dx = inp
         top, = grads
         top = df.th.sandbox.cuda.basic_ops.gpu_contiguous(top)
-        return [RollOpGrad()(top)]
+        return [RollOpGrad()(top, dy, dx)] + [df.th.gradient.DisconnectedType()()]*2
+
+    def connection_pattern(self, node):
+        return [[True], [False], [False]]
 
 
 class UnRollOp(UnRollOpBase):
     def grad(self, inp, grads):
+        _, dy, dx = inp
         top, = grads
         top = df.th.sandbox.cuda.basic_ops.gpu_contiguous(top)
-        return [UnRollOpGrad()(top)]
+        return [UnRollOpGrad()(top, dy, dx)] + [df.th.gradient.DisconnectedType()()]*2
+
+    def connection_pattern(self, node):
+        return [[True], [False], [False]]
+
 
 roll = RollOp()
 unroll = UnRollOp()

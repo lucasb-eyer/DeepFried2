@@ -85,3 +85,5 @@ class TestSpatialOverfeatRoll(unittest.TestCase):
         np.testing.assert_equal(X, Z)
 
         # NOTE: This cannot work with non-divisible sizes.
+
+    # TODO: test gradient (I did some one-off testing, but nothing serious.)
