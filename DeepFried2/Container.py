@@ -9,7 +9,8 @@ class Container(df.Module):
         df.Module.__init__(self)
 
         self.modules = []
-        self.add(*modules)
+        if len(modules):
+            self.add(*modules)
 
     def evaluate(self):
         df.Module.evaluate(self)
