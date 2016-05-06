@@ -42,6 +42,9 @@ class Container(df.Module):
             assert isinstance(m, df.Module), "`{}`s can only contain objects subtyping `df.Module`. You tried to add the following `{}`: {}".format(df.utils.typename(self), df.utils.typename(m), m)
         self.modules += modules
 
+        # Just return for enabling some nicer usage-patterns.
+        return modules
+
     def __getitem__(self, key):
         if isinstance(key, slice):
             return type(self)(*self.modules[key])
