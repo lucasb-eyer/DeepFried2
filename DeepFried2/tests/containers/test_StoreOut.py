@@ -15,6 +15,9 @@ class TestStoreOut(unittest.TestCase):
         Y = net.forward(X)
         np.testing.assert_array_equal(net.out, Y)
 
+        Y = net.forward(X*2)
+        np.testing.assert_array_equal(net.out, Y)
+
         net.evaluate()
         X = np.array([[10,20],[30,40]], dtype=df.floatX)
         Y = net.forward(X)
