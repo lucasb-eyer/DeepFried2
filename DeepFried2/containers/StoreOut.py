@@ -8,6 +8,9 @@ class StoreOut(df.SingleModuleContainer):
 
     @property
     def out(self):
+        # TODO: This isn't robust!!
+        # When someone does .forward(...) and then .accum(...)
+        # and then again .forward(...), here the _last_symb_out is the one from .accum!
         _out = self._last_symb_out.get(self._mode)
         if _out is None:
             return None

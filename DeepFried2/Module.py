@@ -13,6 +13,7 @@ class Module(object):
         self._fn_forward = {}
         self._fn_accum_grads = {}
         self._fn_accum_stats = {}
+        self._last_fn = None
 
         # These will store the last gotten/produced symbolic input/output
         # expressions, respectively. The key is the current mode.
@@ -67,9 +68,9 @@ class Module(object):
             )
             fn._df2_extra = extra_out
 
-        fn = self._fn_forward[self._mode]
-        outs = fn(*flatten(data))
-        return self._collect_extra_outputs(fn, outs)
+        self._last_fn = self._fn_forward[self._mode]
+        outs = self._last_fn(*flatten(data))
+        return self._collect_extra_outputs(self._last_fn, outs)
 
     def accumulate_gradients(self, data_in, data_tgt, crit):
         if self._mode not in self._fn_accum_grads:
@@ -90,10 +91,10 @@ class Module(object):
             )
             fn._df2_extra = extra_out
 
-        fn = self._fn_accum_grads[self._mode]
+        self._last_fn = self._fn_accum_grads[self._mode]
         args = flatten(data_in) + flatten(data_tgt)
-        outs = fn(*args)
-        return self._collect_extra_outputs(fn, outs)
+        outs = self._last_fn(*args)
+        return self._collect_extra_outputs(self._last_fn, outs)
 
     def get_extra_outputs(self):
         """
