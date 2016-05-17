@@ -3,8 +3,9 @@
 import sys, os, json, argparse, collections
 import numpy as np
 import DeepFried2 as df
+from DeepFried2.datasets.images import imread, imresizecrop
 
-from examples.utils import printnow, imread, imresizecrop
+from examples.utils import printnow
 
 
 if __name__ == "__main__":
