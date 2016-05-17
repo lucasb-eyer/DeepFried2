@@ -8,6 +8,9 @@ try:
         im = _cv2.imread(fname, flags=_cv2.IMREAD_UNCHANGED)
         if im is None:
             raise IOError("Couldn't open image file {}".format(fname))
+        # Convert BGR to RGB. OpenCV is weird like that.
+        if im.ndim == 3 and im.shape[-1] == 3:
+            im = im[:,:,::-1]
         return im.astype(dtype)
 
     def imresize(im, h, w):
