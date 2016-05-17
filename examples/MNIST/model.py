@@ -23,12 +23,12 @@ def lenet_cudnn():
     model.add(df.SpatialConvolutionCUDNN(1, 32, (5,5), border='same', bias=False))
     model.add(df.BatchNormalization(32))
     model.add(df.ReLU())
-    model.add(df.SpatialMaxPoolingCUDNN((2,2)))
+    model.add(df.PoolingCUDNN((2,2)))
 
     model.add(df.SpatialConvolutionCUDNN(32, 64, (5,5), border='same', bias=False))
     model.add(df.BatchNormalization(64))
     model.add(df.ReLU())
-    model.add(df.SpatialMaxPoolingCUDNN((2,2)))
+    model.add(df.PoolingCUDNN((2,2)))
     model.add(df.Reshape(-1, 7*7*64))
 
     model.add(df.Linear(7*7*64, 100, bias=False))
