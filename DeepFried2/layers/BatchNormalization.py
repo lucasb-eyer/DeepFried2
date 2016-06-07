@@ -1,5 +1,5 @@
 import DeepFried2 as df
-from DeepFried2.utils import aslist
+from DeepFried2.utils import flatten
 
 import numpy as _np
 
@@ -17,7 +17,7 @@ class BatchNormalization(df.Module):
         """
         df.Module.__init__(self)
 
-        self.shape = tuple(aslist(n_features))
+        self.ndim = len(flatten(n_features))
 
         self.W = self._addparam(n_features, df.init.const(1), name='W_BN_{}'.format(n_features))
         self.b = self._addparam(n_features, df.init.const(0), name='b_BN_{}'.format(n_features), decay=False)
@@ -42,10 +42,10 @@ class BatchNormalization(df.Module):
         # ...then, do not normalize over the `self.shape` dimensions but do over
         # the remaining ones. Take for example 2D images, for which we also
         # want to normalize over the spatial dimensions, e.g. (2,3).
-        axis += list(range(len(self.shape)+1, symb_input.ndim))
+        axis += list(range(self.ndim+1, symb_input.ndim))
 
         # And for the dimshuffle, similar story. Put 'x' on the axes we're normalizing.
-        d_shuffle = ['x'] + list(range(len(self.shape))) + ['x']*(symb_input.ndim-len(self.shape)-1)
+        d_shuffle = ['x'] + list(range(self.ndim)) + ['x']*(symb_input.ndim-self.ndim-1)
         # Shorthand:
         def dshuf(x):
             return x.dimshuffle(*d_shuffle)
@@ -53,7 +53,7 @@ class BatchNormalization(df.Module):
         # For example, for the usual case of images where dimensions are
         # (B,C,H,W), axis == [0, 2, 3] and d_shuffle == ['x', 0, 'x', 'x']
 
-        if self.training_mode:
+        if self._mode == 'train':
             self.batch_mean = df.T.mean(symb_input, axis=axis)
             self.batch_var = df.T.var(symb_input, axis=axis)
 

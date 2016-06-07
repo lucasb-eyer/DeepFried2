@@ -2,33 +2,34 @@ import DeepFried2 as df
 
 
 class UpSample(df.Module):
-    def __init__(self, upsample=(2,2), output_shape=None):
-        """upsample determines how many upsampling steps are taken. (height,width) for 2D or (depth,height,width) for 3D
-           output_shape can be used to crop the upsampled result to a desired size. (height,width) for 2D or (depth,height,width) for 3D
+    def __init__(self, upsample=(2,2), axes=[-2, -1], output_shape=None):
+        """
+        Upsamples an input (nearest-neighbour, repeat) `upsample` times along `axes`.
+
+        - `axes` is a tuple specifying the dimensions along which to upsample.
+        - `upsample` is a tuple of the same length as `axes` specifying the integer upsampling factor along each corresponding axis.
+            If all `axes` should be upsampled by the same factor, `upsample` can also be just that factor.
+        - `output_shape` can be used to crop the upsampled result to a desired shape, it follows `axes` just like `upsample` does.
+            (TODO: move this part into a separate `Restrict` module)
         """
         df.Module.__init__(self)
-        self.upsample = upsample
-        self.output_shape = output_shape
+        self.axes = axes
+        self.upsample = df.utils.expand(upsample, len(axes), "upsample factor")
+        self.output_shape = df.utils.expand(output_shape, len(axes), "output shape")
 
     def symb_forward(self, symb_input):
         """symb_input shape: 2D: (n_input, channels, height, width)
                              3D: (n_input, channels, depth, height, width)
         """
+        res = symb_input
+        for f, ax in zip(self.upsample, self.axes):
+            res = df.T.repeat(res, f, axis=ax)
 
-        if symb_input.ndim == 4 and len(self.upsample) != 2:
-            raise NotImplementedError('A 4D input tensor requires 2D upsampling')
-        elif symb_input.ndim == 5 and len(self.upsample) != 3:
-            raise NotImplementedError('A 5D input tensor requires 3D upsampling')
-
-        res = symb_input.repeat(self.upsample[0], axis=2)
-        res = res.repeat(self.upsample[1], axis=3)
-
-        if symb_input.ndim == 4:
-            if self.output_shape is not None:
-                res = res[:,:,:self.output_shape[0],:self.output_shape[1]]
-        elif symb_input.ndim == 5:
-            res = res.repeat(self.upsample[2], axis=4)
-            if self.output_shape is not None:
-                res = res[:,:,:self.output_shape[0],:self.output_shape[1],:self.output_shape[2]]
+        # TODO: move this out to its own `Restrict` module.
+        if self.output_shape is not None:
+            restrict = [slice(None)]*symb_input.ndim
+            for sh, ax in zip(self.output_shape, self.axes):
+                restrict[ax] = slice(sh)
+            res = res[tuple(restrict)]
 
         return res

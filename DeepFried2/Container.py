@@ -9,7 +9,8 @@ class Container(df.Module):
         df.Module.__init__(self)
 
         self.modules = []
-        self.add(*modules)
+        if len(modules):
+            self.add(*modules)
 
     def evaluate(self):
         df.Module.evaluate(self)
@@ -30,6 +31,9 @@ class Container(df.Module):
         # e.g. do weight sharing.
         return list(_OrderedDict.fromkeys(params).keys())
 
+    def get_extra_outputs(self):
+        return list(_chain.from_iterable(m.get_extra_outputs() for m in self.modules))
+
     def get_stat_updates(self):
         return list(_chain.from_iterable(m.get_stat_updates() for m in self.modules))
 
@@ -38,13 +42,20 @@ class Container(df.Module):
             assert isinstance(m, df.Module), "`{}`s can only contain objects subtyping `df.Module`. You tried to add the following `{}`: {}".format(df.utils.typename(self), df.utils.typename(m), m)
         self.modules += modules
 
+        # Just return for enabling some nicer usage-patterns.
+        return modules
+
     def __getitem__(self, key):
         if isinstance(key, slice):
-            return type(self)(*df.utils.aslist(self.modules[key]))
+            return type(self)(*self.modules[key])
         elif isinstance(key, (list, tuple)):
             return type(self)(*[self.modules[k] for k in key])
         else:
             return self.modules[key]
+
+    def __len__(self):
+        # This one is needed to make __getindex__ work with negative indices.
+        return len(self.modules)
 
     def __getstate__(self):
         return [m.__getstate__() for m in self.modules]
@@ -52,3 +63,16 @@ class Container(df.Module):
     def __setstate__(self, state):
         for m, s in zip(self.modules, state):
             m.__setstate__(s)
+
+
+class SingleModuleContainer(Container):
+    def __init__(self, module):
+        Container.__init__(self, module)
+
+    def add(self, mod):
+        if len(self.modules):
+            raise TypeError("Container `{}` can't hold more than one module.".format(df.utils.typename(self)))
+        Container.add(self, mod)
+
+    def symb_forward(self, symb_input):
+        return self.modules[0](symb_input)

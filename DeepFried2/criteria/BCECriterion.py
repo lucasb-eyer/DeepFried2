@@ -7,12 +7,16 @@ class BCECriterion(df.Criterion):
     """
 
     def __init__(self, clip=None):
+        """
+        - clip: clip inputs to [clip, 1-clip] to avoid potential numerical issues.
+        """
         df.Criterion.__init__(self)
         self.clip = clip
 
-    def symb_forward(self, symb_input, symb_targets):
-        self._assert_same_dim(symb_input, symb_targets)
+    def symb_forward(self, symb_input, symb_target):
+        self._assert_same_dim(symb_input, symb_target)
 
         if self.clip is not None:
             symb_input = df.T.clip(symb_input, self.clip, 1-self.clip)
-        return df.T.mean(df.T.sum(df.T.nnet.binary_crossentropy(symb_input, symb_targets), axis=1))
+
+        return df.T.nnet.binary_crossentropy(symb_input, symb_target)

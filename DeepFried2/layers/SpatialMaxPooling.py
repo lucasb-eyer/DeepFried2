@@ -1,9 +1,9 @@
 import DeepFried2 as df
-from theano.tensor.signal.downsample import max_pool_2d
+from theano.tensor.signal.pool import pool_2d, Pool
 
 
 class SpatialMaxPooling(df.Module):
-    def __init__(self, window_size, stride=None, padding=None, ignore_border=False):
+    def __init__(self, window_size, stride=None, padding=None, ignore_border=True):
         df.Module.__init__(self)
         self.window_size = window_size
         self.ignore_border = ignore_border
@@ -36,7 +36,7 @@ class SpatialMaxPooling(df.Module):
 
             # downsample height and width first
             # other dimensions contribute to batch_size
-            op = df.T.signal.downsample.DownsampleFactorMax(self.window_size[1:], self.ignore_border, st=self.stride[1:], padding=self.padding[1:])
+            op = Pool(self.window_size[1:], self.ignore_border, st=self.stride[1:], padding=self.padding[1:])
             output = op(input_4d)
 
             outshape = df.T.join(0, symb_input.shape[:-2], output.shape[-2:])
@@ -56,7 +56,7 @@ class SpatialMaxPooling(df.Module):
 
             # downsample depth
             # other dimensions contribute to batch_size
-            op = df.T.signal.downsample.DownsampleFactorMax((1,self.window_size[0]), self.ignore_border, st=(1,self.stride[0]), padding=(0, self.padding[0]))
+            op = Pool((1,self.window_size[0]), self.ignore_border, st=(1,self.stride[0]), padding=(0, self.padding[0]))
             outdepth = op(input_4D_depth)
 
             outshape = df.T.join(0, input_depth.shape[:-2], outdepth.shape[-2:])
@@ -64,7 +64,7 @@ class SpatialMaxPooling(df.Module):
 
             return df.T.reshape(outdepth, outshape, ndim=symb_input.ndim).dimshuffle(shufl)
         else:
-            return max_pool_2d(
+            return pool_2d(
                 symb_input,
                 ds=self.window_size,
                 ignore_border=self.ignore_border,

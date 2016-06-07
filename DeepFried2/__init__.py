@@ -9,7 +9,7 @@ from .Param import Param
 from .Module import Module
 from .layers import *
 
-from .Container import Container
+from .Container import Container, SingleModuleContainer
 from .containers import *
 
 from .Criterion import Criterion

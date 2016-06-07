@@ -26,35 +26,35 @@ def make_tensor(dtype, ndim, name):
     return df.th.tensor.TensorType(dtype, (False,) * ndim)(name)
 
 
-def make_tensor_or_tensors(data_or_datas, name):
-    if isinstance(data_or_datas, (list, tuple)):
-        return [make_tensor(data.dtype, data.ndim, name + str(i+1)) for i, data in enumerate(data_or_datas)]
-    else:
-        return make_tensor(data_or_datas.dtype, data_or_datas.ndim, name)
+def tensors_for_ndarrays(datas, basename):
+    if isinstance(datas, _np.ndarray):
+        return make_tensor(datas.dtype, datas.ndim, basename)
+
+    if isinstance(datas, (list, tuple)):
+        return [tensors_for_ndarrays(data, "{}_{}".format(basename, i)) for i, data in enumerate(datas)]
+    # Could potentially make it "any iterable" by removing above check.
+    # But would need to guarantee we never iterate over it twice, which is harder!
+    raise TypeError("I only understand lists or tuples of numpy arrays! (possibly nested)")
 
 
-def count_params(module):
-    return sum(p.get_value().size for p in module.parameters())
+def count_params(module, trainable_only=True):
+    return sum(p.get_value().size for p in module.parameters(trainable_only=trainable_only))
 
 
-def save_params(module, where, compress=False):
-    savefn = _np.savez_compressed if compress else _np.savez
-    savefn(where, params=[p.get_value() for p in module.parameters()])
+def flatten(what, types=(list, tuple), none_to_empty=False):
+    if what is None and none_to_empty:
+        return []
 
-
-def load_params(module, fromwhere):
-    with _np.load(fromwhere) as f:
-        for p, v in zip(module.parameters(), f['params']):
-            p.set_value(v)
-
-
-def aslist(what):
-    if isinstance(what, list):
-        return what
-    elif isinstance(what, tuple):
-        return list(what)
-    else:
+    if not isinstance(what, types):
         return [what]
+
+    # NOTE: I actually timed that this is faster than the comprehension,
+    #       even though it probably doesn't matter :)
+    # 350us vs 250us
+    ret = []
+    for sub in what:
+        ret += flatten(sub, types=types, none_to_empty=none_to_empty)
+    return ret
 
 
 def expand(tup, ndim, name=None, expand_nonnum=False):
