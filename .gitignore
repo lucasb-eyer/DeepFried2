@@ -2,5 +2,5 @@ __pycache__
 *.pyc
 DeepFried2.egg-info/
 examples/Kaggle-Otto/data/
-/build
-/dist
+build
+dist
