@@ -13,6 +13,10 @@ class SpatialConvolutionCUDNN(df.Module):
         # 3: https://github.com/vlfeat/matconvnet/blob/b7dd9c96/matlab/src/bits/impl/nnconv_cudnn.cu#L133
         # 4: https://github.com/BVLC/caffe/blob/50ab52cb/include/caffe/util/cudnn.hpp#L104
         df.Module.__init__(self)
+        
+        # Catch a probably common bug while we transition the API.
+        assert isinstance(filter_size, (list, tuple)), "New conv API: filter_size needs to be a tuple!"
+
         self.nchan_in = nchan_in
         self.nchan_out = nchan_out
         self.filter_size = filter_size
