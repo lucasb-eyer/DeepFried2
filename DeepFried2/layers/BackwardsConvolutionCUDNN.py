@@ -8,12 +8,24 @@ import numpy as np
 
 class BackwardsConvolutionCUDNN(df.Module):
     def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border=0, mode='cross', init=df.init.xavier(), bias=df.init.const(0)):
-        # mode='cross' is the default in Lasagne[1], Torch[2], matConvNet[3], Caffee[4].
-        #
-        # 1: https://github.com/Lasagne/Lasagne/blob/63d44a0d/lasagne/layers/dnn.py#L299
-        # 2: https://github.com/soumith/cudnn.torch/blob/840f0228/SpatialConvolution.lua#L83
-        # 3: https://github.com/vlfeat/matconvnet/blob/b7dd9c96/matlab/src/bits/impl/nnconv_cudnn.cu#L133
-        # 4: https://github.com/BVLC/caffe/blob/50ab52cb/include/caffe/util/cudnn.hpp#L104
+        """
+        This is the backwards path through a convolution, sometimes is also
+        referred to as transposed convolution and (wrongly) deconvolution.
+
+        This is usually used for upsampling an image. If you want the exact
+        counterpart to another convolution earlier part of your model, consider
+        using the `backward` function with that convolution instead.
+
+        - `nchan_in`: number of channels in the input.
+        - `nchan_out`: number of filters and thus channels in the output.
+        - `filter_size`: 2D or 3D tuple describing the filter size.
+        - `stride`: the stride "dilates" the output, i.e. makes it larger.
+        - `border`: The counterpart to `border` in forward convolution. This
+            effectively crops the output, as opposed to padding it.
+        - `mode`: `'cross'` or `'conv'`, see forward convolution documentation.
+        - `init`: initializer for the weights/filters.
+        - `bias`: initializer for the bias, or `None` or `False`.
+        """
         df.Module.__init__(self)
         self.nchan_in = nchan_in
         self.nchan_out = nchan_out
@@ -39,14 +51,15 @@ class BackwardsConvolutionCUDNN(df.Module):
 
 
     def symb_forward(self, symb_input):
-        """ creates dummy forward conv and uses its gradient as backwards pass """
-        """ This code is mostly taken from https://github.com/Newmu/dcgan_code/blob/master/lib/ops.py """
+        # Calls directly into CUDNN's gradient methods to insert a backward-conv Op.
+        # This code is originally taken from https://github.com/Newmu/dcgan_code/blob/master/lib/ops.py
+        # and extended to more complex scenarios (stride, border)
         img = gpu_contiguous(symb_input)
         kerns = gpu_contiguous(self.W.param)
 
-        alloc_shape = (img.shape[0], kerns.shape[1]) + tuple(i*d for i,d in zip(img.shape[2:],self.stride))
-        desc = dnn.GpuDnnConvDesc(border_mode=self.border, subsample=self.stride, conv_mode=self.mode)(gpu_alloc_empty(*alloc_shape).shape, kerns.shape)
+        alloc_shape = (img.shape[0], self.nchan_out) + tuple((i-1)*s - 2*b + f for i,s,b,f in zip(img.shape[2:], self.stride, self.border, self.filter_size))
         out = gpu_alloc_empty(*alloc_shape)
+        desc = dnn.GpuDnnConvDesc(border_mode=self.border, subsample=self.stride, conv_mode=self.mode)(out.shape, kerns.shape)
         grad = dnn.GpuDnnConv3dGradI if symb_input.ndim == 5 else dnn.GpuDnnConvGradI
         conv_output = grad()(kerns, img, out, desc)
 
