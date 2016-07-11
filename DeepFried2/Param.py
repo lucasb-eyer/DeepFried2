@@ -10,7 +10,12 @@ class Param(object):
         self.fan = fan
         self.decay = decay
 
-        val = init(self.shape, self.fan).astype(dtype)
+        # Support a useful shortcut for initializing with an array-like:
+        # TODO: It would be nicer to use Python's buffer-interface.
+        if hasattr(init, 'shape') and hasattr(init, 'dtype'):
+            self.init = df.init.array(init)
+
+        val = self.init(self.shape, self.fan).astype(dtype)
         self.param = df.th.shared(val, name=name, **kw)
 
         if learn:
