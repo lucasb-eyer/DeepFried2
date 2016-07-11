@@ -6,7 +6,7 @@ class Param(object):
 
     def __init__(self, shape, init, fan=None, name=None, learn=True, decay=True, dtype=df.floatX, **kw):
         self.init = init
-        self.shape = shape
+        self.shape = (shape,) if _np.isscalar(shape) else tuple(shape)
         self.fan = fan
         self.decay = decay
 
