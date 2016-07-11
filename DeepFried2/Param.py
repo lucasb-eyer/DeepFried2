@@ -41,5 +41,5 @@ class Param(object):
     def may_decay(self):
         return self.grad is not None and self.decay
 
-    def trainable(self):
+    def learnable(self):
         return self.grad is not None

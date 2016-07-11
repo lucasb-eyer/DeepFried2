@@ -41,13 +41,13 @@ class Module(object):
 
 
     def zero_grad_parameters(self):
-        for p in self.parameters(trainable_only=True):
+        for p in self.parameters(learnable_only=True):
             p.zero_grad()
 
-    def parameters(self, trainable_only=False):
+    def parameters(self, learnable_only=False):
         params = getattr(self, '_params', [])
-        if trainable_only:
-            params = [p for p in params if p.trainable()]
+        if learnable_only:
+            params = [p for p in params if p.learnable()]
         return params
 
     def evaluate(self):
@@ -88,7 +88,7 @@ class Module(object):
             symb_cost = crit(symb_out, symb_tgt)
             extra_out = self.get_extra_outputs() + crit.get_extra_outputs()
 
-            params = self.parameters(trainable_only=True)
+            params = self.parameters(learnable_only=True)
             symb_grads = df.th.grad(cost=symb_cost, wrt=[p.param for p in params])
             grads_updates = [(p.grad, p.grad + symb_grad) for p, symb_grad in zip(params, symb_grads)]
 

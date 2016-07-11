@@ -37,8 +37,8 @@ def tensors_for_ndarrays(datas, basename):
     raise TypeError("I only understand lists or tuples of numpy arrays! (possibly nested)")
 
 
-def count_params(module, trainable_only=True):
-    return sum(p.get_value().size for p in module.parameters(trainable_only=trainable_only))
+def count_params(module, learnable_only=True):
+    return sum(p.get_value().size for p in module.parameters(learnable_only=learnable_only))
 
 
 def flatten(what, types=(list, tuple), none_to_empty=False):

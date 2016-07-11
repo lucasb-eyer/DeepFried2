@@ -12,7 +12,7 @@ class Optimizer(object):
         if model not in self.states:
             # TODO: Not only scalar, e.g. Adam might profit from integer t
             hyperparams = {name: df.T.scalar(name) for name in self.hyperparams}
-            params, grads = zip(*[(p.param, p.grad) for p in model.parameters(trainable_only=True)])
+            params, grads = zip(*[(p.param, p.grad) for p in model.parameters(learnable_only=True)])
             updates = self.get_updates(params, grads, **hyperparams)
             self.states[model] = df.th.function(
                 inputs=list(hyperparams.values()),
