@@ -52,6 +52,18 @@ def reinit(module):
     return module
 
 
+def freeze(module):
+    for p in module.parameters(learnable_only=True):
+        p.freeze()
+    return module
+
+
+def thaw(module):
+    for p in module.parameters():
+        p.thaw()
+    return module
+
+
 def flatten(what, types=(list, tuple), none_to_empty=False):
     if what is None and none_to_empty:
         return []

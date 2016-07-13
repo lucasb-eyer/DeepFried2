@@ -26,3 +26,13 @@ class TestUtils(unittest.TestCase):
         self.assertListEqual(df2.utils.flatten([[1,2],[None,4]], none_to_empty=True), [1,2,4])
         self.assertListEqual(df2.utils.flatten([[1,[2,[None,[4,]]]]], none_to_empty=True), [1,2,4])
         self.assertListEqual(df2.utils.flatten([[[[1],2],None],4], none_to_empty=True), [1,2,4])
+
+    def testFreezingThawing(self):
+        l = df2.Linear(2,3)
+        self.assertIn(l.W, l.parameters(learnable_only=True))
+
+        df2.utils.freeze(l)
+        self.assertEqual(0, len(l.parameters(learnable_only=True)))
+
+        df2.utils.thaw(l)
+        self.assertIn(l.W, l.parameters(learnable_only=True))
