@@ -5,7 +5,7 @@ import numpy as _np
 
 class Linear(df.Module):
 
-    def __init__(self, nin, nout, init=df.init.xavier(), bias=df.init.const(0)):
+    def __init__(self, nin, nout, init=df.init.xavier(), bias=0):
         df.Module.__init__(self)
 
         self.nin = nin
@@ -13,10 +13,7 @@ class Linear(df.Module):
 
         shape = (nin, nout)
         self.W = self._addparam(shape, init, fan=shape, name='Wlin_{}x{}'.format(*shape))
-        if bias not in (None, False):
-            self.b = self._addparam(nout, bias, decay=False, name='blin_{}'.format(nout))
-        else:
-            self.b = None
+        self.b = self._addparam_optional(nout, bias, decay=False, name='blin_{}'.format(nout))
 
     def symb_forward(self, symb_input):
         out = df.T.dot(symb_input, self.W.param)

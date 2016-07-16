@@ -4,7 +4,7 @@ import numpy as np
 from theano.tensor.nnet import conv3d2d
 
 class SpatialConvolution(df.Module):
-    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border='valid', mode='cross', init=df.init.xavier(), bias=df.init.const(0), imshape=None):
+    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border='valid', mode='cross', init=df.init.xavier(), bias=0, imshape=None):
         # See `SpatialConvolutionCUDNN` comment for the `mode` parameter. Only works in 2D
         df.Module.__init__(self)
         self.nchan_in = nchan_in
@@ -31,11 +31,7 @@ class SpatialConvolution(df.Module):
         w_fan = (nchan_in*np.prod(self.filter_size), nchan_out*np.prod(self.filter_size))
         w_name = ('Wconv_{},{}@{}' + 'x{}'*(len(self.w_shape) - 3)).format(*self.w_shape)
         self.W = self._addparam(self.w_shape, init, fan=w_fan, name=w_name)
-
-        if bias not in (None, False):
-            self.b = self._addparam(nchan_out, bias, decay=False, name='bconv_{}'.format(nchan_out))
-        else:
-            self.b = None
+        self.b = self._addparam_optional(nchan_out, bias, decay=False, name='bconv_{}'.format(nchan_out))
 
 
     def symb_forward(self, symb_input):
