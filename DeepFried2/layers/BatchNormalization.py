@@ -2,6 +2,7 @@ import DeepFried2 as df
 from DeepFried2.utils import flatten
 
 import numpy as _np
+from warnings import warn as _warn
 
 
 class BatchNormalization(df.Module):
@@ -83,6 +84,10 @@ class BatchNormalization(df.Module):
         df.Module.evaluate(self)
         self.Winf.set_value(self.W.get_value() / _np.sqrt(self.buf_var.get_value() + self.eps))
         self.binf.set_value(self.b.get_value() - self.Winf.get_value() * self.buf_mean.get_value())
+
+        # This check saved me from WTF'ing countless times!
+        if self.buf_count.get_value() == 0:
+            _warn("You're switching a BN-net to eval mode without having collected any statistics, that can't go well!")
 
     def __getstate__(self):
         regular = df.Module.__getstate__(self)
