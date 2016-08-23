@@ -24,6 +24,7 @@ class Criterion(object):
         else:
             weight, pen = weight_or_pen, pen
         self.penalties.append((weight, pen))
+        return self
 
     def __call__(self, symb_input, symb_target, with_penalties=True):
         # Possibly extract the weights as 2nd target.
