@@ -7,7 +7,7 @@ import numpy as np
 
 
 class BackwardsConvolutionCUDNN(df.Module):
-    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border=0, mode='cross', init=df.init.xavier(), bias=df.init.const(0)):
+    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border=0, mode='cross', init=df.init.xavier(), bias=0):
         """
         This is the backwards path through a convolution, sometimes is also
         referred to as transposed convolution and (wrongly) deconvolution.
@@ -43,11 +43,7 @@ class BackwardsConvolutionCUDNN(df.Module):
         w_fan = (np.prod(self.filter_size)*nchan_out, np.prod(self.filter_size)*nchan_in)
         w_name = ('Wconv_{},{}@{}' + 'x{}'*(len(w_shape) - 3)).format(*w_shape)
         self.W = self._addparam(w_shape, init, fan=w_fan, name=w_name)
-
-        if bias not in (None, False):
-            self.b = self._addparam(nchan_out, bias, decay=False, name='bconv_{}'.format(nchan_out))
-        else:
-            self.b = None
+        self.b = self._addparam_optional(nchan_out, bias, decay=False, name='bconv_{}'.format(nchan_out))
 
 
     def symb_forward(self, symb_input):

@@ -22,14 +22,23 @@ class Module(object):
     #def __hash__(self):
     #    raise NotImplementedError("You *need* to reimplement hash, even if it's just python's default. See the documentation for more info.")
 
-    def _addparam(self, *a, **kw):
+    def _addparam(self, shape, init, *a, **kw):
+        assert init is not None and init is not False, "`{}` requires parameter `{}` to have initializer.".format(df.utils.typename(self), kw.get("name", "unnamed"))
+
         # Add it here because many don't even have params. This avoids misuse.
         if not hasattr(self, '_params'):
             self._params = []
 
-        param = df.Param(*a, **kw)
+        param = df.Param(shape, init, *a, **kw)
         self._params.append(param)
         return param
+
+    def _addparam_optional(self, shape, init, *a, **kw):
+        if init is None or init is False:
+            return None
+
+        return self._addparam(shape, init, *a, **kw)
+
 
     def zero_grad_parameters(self):
         for p in self.parameters(trainable_only=True):

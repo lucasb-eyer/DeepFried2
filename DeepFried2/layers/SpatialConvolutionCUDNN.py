@@ -5,7 +5,7 @@ from theano.sandbox.cuda import dnn
 import numpy as np
 
 class SpatialConvolutionCUDNN(df.Module):
-    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border=0, mode='cross', init=df.init.xavier(), bias=df.init.const(0)):
+    def __init__(self, nchan_in, nchan_out, filter_size, stride=1, border=0, mode='cross', init=df.init.xavier(), bias=0):
         # mode='cross' is the default in Lasagne[1], Torch[2], matConvNet[3], Caffee[4].
         #
         # 1: https://github.com/Lasagne/Lasagne/blob/63d44a0d/lasagne/layers/dnn.py#L299
@@ -13,7 +13,7 @@ class SpatialConvolutionCUDNN(df.Module):
         # 3: https://github.com/vlfeat/matconvnet/blob/b7dd9c96/matlab/src/bits/impl/nnconv_cudnn.cu#L133
         # 4: https://github.com/BVLC/caffe/blob/50ab52cb/include/caffe/util/cudnn.hpp#L104
         df.Module.__init__(self)
-        
+
         # Catch a probably common bug while we transition the API.
         assert isinstance(filter_size, (list, tuple)), "New conv API: filter_size needs to be a tuple!"
 
@@ -33,11 +33,7 @@ class SpatialConvolutionCUDNN(df.Module):
         w_fan = (np.prod(self.filter_size)*nchan_in, np.prod(self.filter_size)*nchan_out)
         w_name = ('Wconv_{},{}@{}' + 'x{}'*(len(w_shape) - 3)).format(*w_shape)
         self.W = self._addparam(w_shape, init, fan=w_fan, name=w_name)
-
-        if bias not in (None, False):
-            self.b = self._addparam(nchan_out, bias, decay=False, name='bconv_{}'.format(nchan_out))
-        else:
-            self.b = None
+        self.b = self._addparam_optional(nchan_out, bias, decay=False, name='bconv_{}'.format(nchan_out))
 
 
     def symb_forward(self, symb_input):

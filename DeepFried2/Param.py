@@ -10,10 +10,12 @@ class Param(object):
         self.fan = fan
         self.decay = decay
 
-        # Support a useful shortcut for initializing with an array-like:
-        # TODO: It would be nicer to use Python's buffer-interface.
+        # Support a couple useful shortcut for initializing:
         if hasattr(init, 'shape') and hasattr(init, 'dtype'):
+            # TODO: It would be nicer to use Python's buffer-interface.
             self.init = df.init.array(init)
+        elif _np.isscalar(init):
+            self.init = df.init.const(init)
 
         val = self.init(self.shape, self.fan).astype(dtype)
         self.param = df.th.shared(val, name=name, **kw)
