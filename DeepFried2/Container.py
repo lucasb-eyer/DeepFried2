@@ -34,6 +34,9 @@ class Container(df.Module):
     def get_extra_outputs(self):
         return list(_chain.from_iterable(m.get_extra_outputs() for m in self.modules))
 
+    def get_extra_updates(self):
+        return list(_chain.from_iterable(m.get_extra_updates() for m in self.modules))
+
     def get_stat_updates(self):
         return list(_chain.from_iterable(m.get_stat_updates() for m in self.modules))
 

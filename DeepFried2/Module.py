@@ -70,9 +70,11 @@ class Module(object):
             symb_in = tensors_for_ndarrays(data, 'X')
             symb_out = self(symb_in)
             extra_out = self.get_extra_outputs()
+            extra_up = self.get_extra_updates()
             fn = self._fn_forward[self._mode] = df.th.function(
                 inputs=flatten(symb_in),
-                outputs=flatten(symb_out) + flatten(extra_out)
+                outputs=flatten(symb_out) + flatten(extra_out),
+                updates=flatten(extra_up, types=list),
             )
             fn._df2_extra = extra_out
 
@@ -87,6 +89,7 @@ class Module(object):
             symb_out = self(symb_in)
             symb_cost = crit(symb_out, symb_tgt)
             extra_out = self.get_extra_outputs() + crit.get_extra_outputs()
+            extra_up = self.get_extra_updates()
 
             params = self.parameters(learnable_only=True)
             symb_grads = df.th.grad(cost=symb_cost, wrt=[p.param for p in params])
@@ -95,7 +98,7 @@ class Module(object):
             fn = self._fn_accum_grads[self._mode] = df.th.function(
                 inputs=flatten(symb_in) + flatten(symb_tgt),
                 outputs=flatten(symb_cost) + flatten(extra_out),
-                updates=grads_updates
+                updates=grads_updates + flatten(extra_up, types=list),
             )
             fn._df2_extra = extra_out
 
@@ -112,6 +115,10 @@ class Module(object):
 
         Guaranteed to be called after `symb_forward`.
         """
+        return []
+
+    def get_extra_updates(self):
+        """NOTE: MUST BE LIST OF TUPLES (because of how flatten is called)"""
         return []
 
     def _collect_extra_outputs(self, fn, vals):
@@ -148,6 +155,7 @@ class Module(object):
                 # If there's no layer collecting statistics, we don't need to
                 # compile and call a function. This prevents theano errors.
                 return
+            extra_up = self.get_extra_updates()
 
             # Need to make sure there's only one update per variable for the
             # case where we've got the same module instance at multiple places
@@ -167,7 +175,7 @@ class Module(object):
 
             self._fn_accum_stats[self._mode] = df.th.function(
                 inputs=flatten(symb_in),
-                updates=stat_updates
+                updates=stat_updates + flatten(extra_up, types=list)
             )
 
         self._fn_accum_stats[self._mode](*flatten(data_in))
