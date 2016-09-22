@@ -81,7 +81,7 @@ class Module(object):
         return self._collect_extra_outputs(fn, outs)
 
     def accumulate_gradients(self, data_in, data_tgt, crit):
-        if self._mode not in self._fn_accum_grads:
+        if (self._mode, id(crit)) not in self._fn_accum_grads:
             symb_in = tensors_for_ndarrays(data_in, 'X')
             symb_tgt = tensors_for_ndarrays(data_tgt, 'T')
             symb_out = self(symb_in)
@@ -92,14 +92,14 @@ class Module(object):
             symb_grads = df.th.grad(cost=symb_cost, wrt=[p.param for p in params])
             grads_updates = [(p.grad, p.grad + symb_grad) for p, symb_grad in zip(params, symb_grads)]
 
-            fn = self._fn_accum_grads[self._mode] = df.th.function(
+            fn = self._fn_accum_grads[self._mode, id(crit)] = df.th.function(
                 inputs=flatten(symb_in) + flatten(symb_tgt),
                 outputs=flatten(symb_cost) + flatten(extra_out),
                 updates=grads_updates
             )
             fn._df2_extra = extra_out
 
-        fn = self._fn_accum_grads[self._mode]
+        fn = self._fn_accum_grads[self._mode, id(crit)]
         args = flatten(data_in) + flatten(data_tgt)
         outs = fn(*args)
         return self._collect_extra_outputs(fn, outs)
