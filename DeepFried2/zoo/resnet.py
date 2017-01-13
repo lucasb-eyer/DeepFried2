@@ -13,7 +13,7 @@ class Add(df.Module):
 
 def block(nchan, fs=(3,3), body=None):
     return df.Sequential(
-        df.Parallel(
+        df.RepeatInput(
             df.Sequential(
                 df.BatchNormalization(nchan), df.ReLU(),
                 df.SpatialConvolutionCUDNN(nchan, nchan, fs, border='same', init=df.init.prelu(), bias=False),
@@ -28,7 +28,7 @@ def block(nchan, fs=(3,3), body=None):
 
 def block_proj(nin, nout, fs=(3,3), body=None):
     return df.Sequential(
-        df.Parallel(
+        df.RepeatInput(
             df.Sequential(
                 df.BatchNormalization(nin), df.ReLU(),
                 df.SpatialConvolutionCUDNN(nin, nout, fs, border='same', init=df.init.prelu(), bias=False),
