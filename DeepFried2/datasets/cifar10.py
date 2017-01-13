@@ -18,7 +18,7 @@ def data():
                 batch = _pickle.load(b, encoding='latin1')
                 datas.append(_np.array(batch['data'], dtype=_np.float32))
                 labels.append(_np.array(batch['labels']))
-        Xtr = _np.concatenate(datas)
+        Xtr = _np.concatenate(datas).reshape((-1, 3, 32, 32))
         ytr = _np.concatenate(labels)
         Xtr /= 255
 
@@ -26,13 +26,13 @@ def data():
         # https://code.google.com/p/cuda-convnet/wiki/Methodology
         with f.extractfile('cifar-10-batches-py/data_batch_5') as b:
             batch = _pickle.load(b, encoding='latin1')
-        Xva = _np.array(batch['data'], dtype=_np.float32)
+        Xva = _np.array(batch['data'], dtype=_np.float32).reshape((-1, 3, 32, 32))
         yva = _np.array(batch['labels'])
         Xva /= 255
 
         with f.extractfile('cifar-10-batches-py/test_batch') as b:
             batch = _pickle.load(b, encoding='latin1')
-        Xte = _np.array(batch['data'], dtype=_np.float32)
+        Xte = _np.array(batch['data'], dtype=_np.float32).reshape((-1, 3, 32, 32))
         yte = _np.array(batch['labels'])
         Xte /= 255
 

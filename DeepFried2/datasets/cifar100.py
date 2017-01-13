@@ -13,7 +13,7 @@ def data():
     with _taropen(fname, 'r') as f:
         with f.extractfile('cifar-100-python/train') as train:
             train = _pickle.load(train, encoding='latin1')
-        Xtr = _np.array(train['data'], dtype=_np.float32)
+        Xtr = _np.array(train['data'], dtype=_np.float32).reshape((-1, 3, 32, 32))
         ytr_c = _np.array(train['coarse_labels'])
         ytr_f = _np.array(train['fine_labels'])
         Xtr /= 255
@@ -27,7 +27,7 @@ def data():
 
         with f.extractfile('cifar-100-python/test') as test:
             test = _pickle.load(test, encoding='latin1')
-        Xte = _np.array(test['data'], dtype=_np.float32)
+        Xte = _np.array(test['data'], dtype=_np.float32).reshape((-1, 3, 32, 32))
         yte_c = _np.array(test['coarse_labels'])
         yte_f = _np.array(test['fine_labels'])
         Xte /= 255
