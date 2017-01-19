@@ -11,13 +11,13 @@ class Add(df.Module):
         return s
 
 
-def block(nchan, fs=(3,3), body=None):
+def block(nchan, fs=(3,3), body=None, bnmom=False):
     return df.Sequential(
         df.RepeatInput(
             df.Sequential(
-                df.BatchNormalization(nchan), df.ReLU(),
+                df.BatchNormalization(nchan, bnmom), df.ReLU(),
                 df.SpatialConvolutionCUDNN(nchan, nchan, fs, border='same', init=df.init.prelu(), bias=False),
-                df.BatchNormalization(nchan), df.ReLU(),
+                df.BatchNormalization(nchan, bnmom), df.ReLU(),
                 df.SpatialConvolutionCUDNN(nchan, nchan, fs, border='same', init=df.init.prelu(), bias=False)
             ) if body is None else body,
             df.Identity()
@@ -26,13 +26,13 @@ def block(nchan, fs=(3,3), body=None):
     )
 
 
-def block_proj(nin, nout, fs=(3,3), body=None):
+def block_proj(nin, nout, fs=(3,3), body=None, bnmom=False):
     return df.Sequential(
         df.RepeatInput(
             df.Sequential(
-                df.BatchNormalization(nin), df.ReLU(),
+                df.BatchNormalization(nin, bnmom), df.ReLU(),
                 df.SpatialConvolutionCUDNN(nin, nout, fs, border='same', init=df.init.prelu(), bias=False),
-                df.BatchNormalization(nout), df.ReLU(),
+                df.BatchNormalization(nout, bnmom), df.ReLU(),
                 df.SpatialConvolutionCUDNN(nout, nout, fs, border='same', init=df.init.prelu(), bias=False)
             ) if body is None else body,
             df.SpatialConvolutionCUDNN(nin, nout, (1,)*len(fs)),

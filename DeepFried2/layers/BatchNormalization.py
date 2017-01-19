@@ -6,13 +6,15 @@ from warnings import warn as _warn
 
 
 class BatchNormalization(df.Module):
-    def __init__(self, n_features, eps=1e-5):
+    def __init__(self, n_features, momentum=False, eps=1e-5):
         """
         - `n_features` may be an integer (#features, #feature-maps for images) or a tuple.
             - If a single integer, it indicates the size of the 1-axis, i.e. first feature-axis.
               This is the only axis that will be normalized using statistics across all other axes.
             - If a tuple, it indicates the sizes of multiple axes (starting at 1) which are
               considered feature-axes and will consequently be normalized over statistics across all other axes.
+        - `momentum` means statistics are collected as running (geometric) statistics
+          during training. It should be the decay value within (0,1).
         - `eps` is a small number which is added to the variance in order to
           avoid computing sqrt(0) for features with zero variance.
         """
@@ -30,6 +32,7 @@ class BatchNormalization(df.Module):
         self.buf_var = df.th.shared(_np.full(n_features, 1, df.floatX), name='BN_var_{}'.format(n_features))
         self.buf_mean = df.th.shared(_np.full(n_features, 0, df.floatX), name='BN_mean_{}'.format(n_features))
         self.buf_count = df.th.shared(_np.asarray(0, dtype=df.floatX), name='BN_count_{}'.format(n_features))
+        self.momentum = momentum
 
         self.eps = eps or 1e-5
 
@@ -73,6 +76,16 @@ class BatchNormalization(df.Module):
             (self.buf_var, (self.buf_var * self.buf_count + self.batch_var) / (self.buf_count + 1.0)),
             (self.buf_count, self.buf_count + 1.0),
         ]
+
+    def get_extra_updates(self):
+        if self._mode == 'train' and self.momentum != False:
+            return [
+                (self.buf_mean, self.momentum*self.buf_mean + (1-self.momentum)*self.batch_mean),
+                (self.buf_var, self.momentum*self.buf_var + (1-self.momentum)*self.batch_var),
+                (self.buf_count, 1.0),
+            ]
+        else:
+            return []
 
     def training(self):
         df.Module.training(self)
