@@ -36,9 +36,7 @@ class AffineGrid(df.Module):
         self.dx = 2/(gw-1)
 
         if static:
-            init = df.init.const([[[1,0,0],
-                                   [0,1,0]]])
-            self.theta = self._addparam((1,2,3), init, name='θaff', decay=False,
+            self.theta = self._addparam((1,2,3), self.bias_init(), name='θaff', decay=False,
                                         broadcastable=[True, False, False])
             self._theta = self.theta.param
 
@@ -69,10 +67,7 @@ class ProjectiveGrid(df.Module):
         self.dx = 2/(gw-1)
 
         if static:
-            init = df.init.const([1,0,0,
-                                  0,1,0,
-                                  0,0])
-            self.theta = self._addparam((1,8), init, name='θaff', decay=False)
+            self.theta = self._addparam((1,8), self.bias_init(), name='θaff', decay=False)
             self._theta = df.T.concatenate(
                 [self.theta.param, df.T.ones((1,1))], axis=-1
             ).reshape((1,3,3))
