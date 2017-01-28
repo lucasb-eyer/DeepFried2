@@ -36,7 +36,7 @@ class SpatialMaxPooling(df.Module):
 
             # downsample height and width first
             # other dimensions contribute to batch_size
-            op = Pool(self.window_size[1:], self.ignore_border, st=self.stride[1:], padding=self.padding[1:])
+            op = Pool(self.window_size[1:], self.ignore_border, stride=self.stride[1:], pad=self.padding[1:])
             output = op(input_4d)
 
             outshape = df.T.join(0, symb_input.shape[:-2], output.shape[-2:])
@@ -56,7 +56,7 @@ class SpatialMaxPooling(df.Module):
 
             # downsample depth
             # other dimensions contribute to batch_size
-            op = Pool((1,self.window_size[0]), self.ignore_border, st=(1,self.stride[0]), padding=(0, self.padding[0]))
+            op = Pool((1,self.window_size[0]), self.ignore_border, stride=(1,self.stride[0]), pad=(0, self.padding[0]))
             outdepth = op(input_4D_depth)
 
             outshape = df.T.join(0, input_depth.shape[:-2], outdepth.shape[-2:])
@@ -66,8 +66,8 @@ class SpatialMaxPooling(df.Module):
         else:
             return pool_2d(
                 symb_input,
-                ds=self.window_size,
+                ws=self.window_size,
                 ignore_border=self.ignore_border,
-                st=self.stride,
-                padding=self.padding
+                stride=self.stride,
+                pad=self.padding
             )
