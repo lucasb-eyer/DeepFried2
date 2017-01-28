@@ -107,7 +107,6 @@ class BatchNormalization(df.Module):
         return [buf.get_value() for buf in (self.buf_mean, self.buf_var, self.buf_count)] + regular
 
     def __setstate__(self, state):
-        istate = iter(state)
-        for buf, val in zip((self.buf_mean, self.buf_var, self.buf_count), istate):
+        for buf, val in zip((self.buf_mean, self.buf_var, self.buf_count), state):
             buf.set_value(val)
-        df.Module.__setstate__(self, istate)
+        df.Module.__setstate__(self, state[3:])

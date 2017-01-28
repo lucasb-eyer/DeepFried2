@@ -64,6 +64,9 @@ class Container(df.Module):
         return [m.__getstate__() for m in self.modules]
 
     def __setstate__(self, state):
+        if len(self.modules) != len(state):
+            raise ValueError("{} wants to load params for {} modules but received params for {} modules".format(df.utils.typename(self), len(self.modules), len(state)))
+
         for m, s in zip(self.modules, state):
             m.__setstate__(s)
 

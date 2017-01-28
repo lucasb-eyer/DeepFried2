@@ -189,5 +189,12 @@ class Module(object):
         return [p.get_value() for p in self.parameters()]
 
     def __setstate__(self, state):
-        for p, s in zip(self.parameters(), state):
+        params = self.parameters()
+        if len(params) != len(state):
+            raise ValueError("{} wants to load {} params but received {} params".format(df.utils.typename(self), len(params), len(state)))
+
+        for p, s in zip(params, state):
+            if p.get_value().shape != s.shape:
+                raise ValueError("{} got invalid shape when loading param {}: expecting {} but loading {}".format(df.utils.typename(self), p.param.name, p.get_value().shape, s.shape))
+
             p.set_value(s)
