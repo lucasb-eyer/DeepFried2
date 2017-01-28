@@ -28,7 +28,9 @@ class SpatialTransformer(df.Module):
         grids = df.T.clip(grids, -1, 1)
 
         # scale coordinates from [-1, 1] to [0, width/height - 1]
-        whlim = (im.shape[2:] - 1)[None,:,None,None]
+        # The weird [3:1:-1] means [shape[-1], shape[-2]], i.e. [W, H]
+        # This is why the first grid component is w/x and second is h/y.
+        whlim = (im.shape[3:1:-1] - 1)[None,:,None,None]
         grids = (grids + 1)/2 * whlim
 
         # Use this to index the batch-dimension, similar to typical NLL indexing.
