@@ -3,6 +3,7 @@ from .BatchNormalization import BatchNormalization
 from .Bias import Bias
 from .Dropout import Dropout
 from .Embedding import Embedding
+from .GELU import GELU
 from .Identity import Identity
 from .Linear import Linear
 from .Log import Log
