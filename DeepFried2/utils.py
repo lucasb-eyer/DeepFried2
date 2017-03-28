@@ -41,6 +41,12 @@ def count_params(module, learnable_only=True):
     return sum(p.get_value().size for p in module.parameters(learnable_only=learnable_only))
 
 
+def reinit(module):
+    for p in module.parameters():
+        p.reinit()
+    return module
+
+
 def flatten(what, types=(list, tuple), none_to_empty=False):
     if what is None and none_to_empty:
         return []
