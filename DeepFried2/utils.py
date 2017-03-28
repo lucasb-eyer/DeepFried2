@@ -27,8 +27,13 @@ def make_tensor(dtype, ndim, name):
 
 
 def tensors_for_ndarrays(datas, basename):
-    if isinstance(datas, _np.ndarray):
-        return make_tensor(datas.dtype, datas.ndim, basename)
+    #if isinstance(datas, _np.ndarray):
+    try:
+        dtype, ndim = datas.dtype, datas.ndim
+    except AttributeError:
+        pass  # Not an array-like
+    else:
+        return make_tensor(dtype, ndim, basename)
 
     if isinstance(datas, (list, tuple)):
         return [tensors_for_ndarrays(data, "{}_{}".format(basename, i)) for i, data in enumerate(datas)]
