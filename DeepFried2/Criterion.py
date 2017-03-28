@@ -8,6 +8,7 @@ class Criterion(object):
         self.penalties = []
         self.with_weights = False
         self._ret_per_sample = False
+        self._nonzero_averaging = False
         self._fn_forward = {}
 
     def _assert_same_dim(self, symb_input, symb_target):
@@ -45,7 +46,16 @@ class Criterion(object):
         # Criteria may return per-sample cost which we will average
         # (optionally weighted) across samples, if necessary.
         if cost.ndim != 0:
-            cost = df.T.mean(cost)
+            # The default is to average the batch, regardless of the loss values.
+            # But we also allow to average only over non-zero losses, for some
+            # applications. Especially in margin-losses, this may make sense as
+            # it effectively weights the "rare non-zero" losses higher.
+            if self._nonzero_averaging:
+                cost = df.T.mean(cost)
+            else:
+                nnz = df.th.gradient.disconnected_grad(cost.nonzero_values().shape[0])
+                cost = df.T.sum(cost)/(1e-8 + nnz)
+
             if symb_weights is not None:
                 # Need a very small eps to avoid 0/0 when all weights are 0!
                 cost = cost / (1e-8 + df.T.mean(symb_weights))
@@ -66,6 +76,10 @@ class Criterion(object):
 
     def enable_per_sample_cost(self):
         self._ret_per_sample = True
+        return self
+
+    def enable_nonzero_averaging(self):
+        self._nonzero_averaging = True
         return self
 
     def forward(self, num_input, num_target, with_penalties=True, per_sample=False):
