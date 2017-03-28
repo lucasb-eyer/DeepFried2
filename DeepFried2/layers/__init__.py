@@ -10,6 +10,7 @@ from .ReLU import ReLU
 from .ELU import ELU
 from .Reshape import Reshape
 from .Flatten import Flatten
+from .Normalization import Normalization
 from .Permute import Permute
 from .PoolingCUDNN import PoolingCUDNN
 from .Sigmoid import Sigmoid
