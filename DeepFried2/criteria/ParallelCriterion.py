@@ -28,8 +28,8 @@ class ParallelCriterion(df.Criterion):
             self.criteria.append((weight_or_crit, crit))
 
     def symb_forward(self, symb_inputs, symb_targets):
-        symb_inputs = df.utils.flatten(symb_inputs)
-        symb_targets = df.utils.flatten(symb_targets)
+        symb_inputs = list(symb_inputs)
+        symb_targets = list(symb_targets)
 
         if self.repeat_target:
             symb_targets = symb_targets * len(symb_inputs)
